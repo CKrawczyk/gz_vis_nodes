@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <link type="text/css" rel="stylesheet" href="css/style.css"/>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+  </head>
+  <body>
+  <header>
+  <select id="galaxies">
+  <option value="21422">21422</option>   
+  <option value="20871">20871</option>   
+  <option value="21574">21574</option>   
+  <option value="21612">21612</option>   
+  <option value="20054">20054</option>   
+  <option value="21261">21261</option>   
+  <option value="21584">21584</option>   
+  <option value="20986">20986</option>   
+  <option value="21556">21556</option>   
+  <option value="21575">21575</option>   
+  <option value="21442">21442</option>   
+  <option value="21518">21518</option>   
+  <option value="21670">21670</option>   
+  <option value="19989">19989</option>   
+  <option value="21471">21471</option>   
+  <option value="16987">16987</option>   
+  <option value="21661">21661</option>   
+  <option value="21528">21528</option>   
+  <option value="21642">21642</option>   
+  <option value="21804">21804</option>   
+  <option value="19714">19714</option>   
+  <option value="21291">21291</option>   
+  <option value="20436">20436</option>   
+  <option value="21576">21576</option>   
+  <option value="21339">21339</option>   
+  <option value="15335">15335</option>   
+  <option value="21634">21634</option>   
+  <option value="20475">20475</option>   
+  <option value="21482">21482</option>   
+  <option value="20266">20266</option>   
+  <option value="20589">20589</option>   
+  <option value="20247">20247</option>   
+  <option value="19696">19696</option>   
+  <option value="20190">20190</option>   
+  <option value="21245">21245</option>   
+  <option value="21606">21606</option>   
+  <option value="20257">20257</option>   
+  <option value="21559">21559</option>   
+  <option value="21597">21597</option>   
+  <option value="21673">21673</option>   
+  <option value="20704">20704</option>   
+  <option value="15517">15517</option>   
+  <option value="21654">21654</option>   
+  <option value="20334">20334</option>   
+  <option value="21550">21550</option>   
+  <option value="21493">21493</option>   
+  <option value="21531">21531</option>   
+  <option value="15584">15584</option>   
+  <option value="21645">21645</option>   
+  <option value="20619">20619</option>   
+  <option value="21465">21465</option>   
+  <option value="20534">20534</option>   
+  <option value="19537">19537</option>   
+  <option value="20753">20753</option>   
+  <option value="20772">20772</option>   
+  <option value="21513">21513</option>   
+  <option value="21627">21627</option>   
+  <option value="20411">20411</option>   
+  <option value="21618">21618</option>   
+  <option value="21086">21086</option>   
+  <option value="21504">21504</option>   
+  <option value="21656">21656</option>   
+  <option value="20754">20754</option>   
+  <option value="21628">21628</option>   
+  <option value="20108">20108</option>   
+  <option value="21809">21809</option>   
+  <option value="20460">20460</option>   
+  <option value="20327">20327</option>   
+  <option value="21657">21657</option>   
+  <option value="21486">21486</option>   
+  <option value="21600">21600</option>   
+  <option value="20289">20289</option>   
+  <option value="20774">20774</option>   
+  <option value="21515">21515</option>   
+  <option value="21078">21078</option>   
+  <option value="14846">14846</option>   
+  <option value="21648">21648</option>   
+  <option value="21430">21430</option>   
+  <option value="21658">21658</option>   
+  <option value="21620">21620</option>   
+  <option value="21525">21525</option>   
+  <option value="21544">21544</option>   
+  <option value="21582">21582</option>   
+  <option value="21478">21478</option>   
+  <option value="21364">21364</option>   
+  <option value="21383">21383</option>   
+  <option value="21592">21592</option>   
+  <option value="21573">21573</option>   
+  <option value="20357">20357</option>   
+  <option value="15588">15588</option>   
+  <option value="20927">20927</option>   
+  <option value="20918">20918</option>   
+  <option value="21640">21640</option>   
+  <option value="21165">21165</option>   
+  <option value="21659">21659</option>  
+
+  </select>
+  </header>
+<h1>Node Tree: Galaxy Zoo</h1>
+  
+<div id="galaxy_image" style="float:left; margin-right:10px;">
+  <img src="" class="galaxy-image" />
+  <p class="attribution">Source: <a href="http://zoo3.galaxyzoo.org">Galaxy Zoo: Hubble</a>.</p>
+  <br style="clear:both;" />
+</div>
+  
+<div id="tree">
+  <div id="sliders">
+  <div style="float:left; margin-right:50px;">
+    <label for="slider_charge">Charge: <span id="slider_charge_value">...</span></label>
+    <input type="range" min="1" max="5" value="2.5" step="0.01" id="slider_charge" />
+  </div>
+  <div style="float:left; margin-right:50px;">
+    <label for="slider_strength">Link Strength: <span id="slider_strength_value">...</span></label>
+    <input type="range" min="0" max="1" value="1" step="0.01" id="slider_strength" />
+  </div>
+  <div style="float:left; margin-right:50px;">
+    <label for="slider_friction">Friction: <span id="slider_friction_value">...</span></label>
+    <input type="range" min="0" max="1" value="0.2" step="0.01" id="slider_friction" />
+  </div>
+  <div style="float:left; margin-right:50px;">
+    <button type="button" id="reset_button">Reset</button>
+  </div>
+  <br style="clear:both;" />
+  </div>
+  
+  <div id="body">
+  </div>
+</div>
+
+<footer>
+  <aside>Oct 24, 2014</aside>
+  <a href="http://wwww.zooniverse.org" rel="author">Zooniverse</a>
+</footer>
+
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="js/gz.js"></script>
+<script>
+  updateData(21422);
+</script>
+</body>
+</html>
