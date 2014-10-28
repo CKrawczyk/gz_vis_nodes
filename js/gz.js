@@ -27,43 +27,43 @@ var color = d3.scale.category20();
 // create a dictionary pointing the answer_id do the 
 // image offset in workflow.png
 var image_offset = {
-    13: [0], // Bulge Dominate
-    12: [1], // Bulge Obvious
-    11: [2], // Bulge Just Noticeable
-    10: [3], // No Bulge
-    59: [4], // clump spiral
+    13: ["Bulge dominate",0], // Bulge Dominate
+    12: ["Bulge obvious",1], // Bulge Obvious
+    11: ["Bulge just noticeable",2], // Bulge Just Noticeable
+    10: ["No bulge",3], // No Bulge
+    59: ["Clumps spiral-shaped",4], // clump spiral
     //: 5, // clump not-embedded
-    57: [5,29], // no not-embedded (hate dubble neg...) 
-    58: [5,30], // yes not-embedded
+    57: ["Clumps embedded",5,29], // no not-embedded (hate dubble neg...) 
+    58: ["Clumps not embedded",5,30], // yes not-embedded
     //: 6, // clump symmetrical
-    55: [6,30], // yes symmetrical
-    56: [6,29], // no symmetrical
+    55: ["Clumps symmetrical",6,30], // yes symmetrical
+    56: ["Clumps not symmetrical",6,29], // no symmetrical
     //: 7, // clump bright-center
-    45: [7,30], // yes bright-center
-    46: [7,29], // no bright-center
+    45: ["Clumps have bright center",7,30], // yes bright-center
+    46: ["Clumps do not have bright center",7,29], // no bright-center
     //: 8, // clump one-brighter
-    43: [8,30], // yes one clump brighter
-    44: [8,29], // no one clump brighter
-    49: [9], // clump cluster
-    48: [10], // clump chain
-    47: [11], // clump line
-    54: [12], // clump can't tell
-    53: [13], // clump 4+
-    4: [35,30], // yes edge
-    5: [35,29], //no edge
-    39: [13,30], // yes edge on
-    40: [13,29], // no edge on
-    52: [14], // clump 4
-    51: [15], // clump 3
-    50: [16], // clump 2
-    60: [17], // clump 1
-    6: [19,30], // yes bar
-    7: [19,29], // no bar
+    43: ["One clump is brighter",8,30], // yes one clump brighter
+    44: ["One clump is not brighter",8,29], // no one clump brighter
+    49: ["Clumps are clustered",9], // clump cluster
+    48: ["Clumps from a chain",10], // clump chain
+    47: ["Clumps are in a line",11], // clump line
+    54: ["Can not tell how many clumps",12], // clump can't tell
+    39: ["There are clumps",13,30], // yes clumps
+    40: ["There are no clumps",13,29], // no clumps
+    53: ["5+ Clumps",13], // clump 5+
+    52: ["4 Clumps",14], // clump 4
+    51: ["3 Clumps",15], // clump 3
+    50: ["2 Clumps",16], // clump 2
+    60: ["1 Clump",17], // clump 1
+    4: ["The disk is edge on",35,30], // yes edge
+    5: ["The disk is face on",35,29], //no edge
+    6: ["There is a bar",18,30], // yes bar
+    7: ["There is no bar",18,29], // no bar
     //: 18, // spiral bar
     //: 19, // smooth bar
     //: 20, // dustlane
     //: 21, // irregular
-    2: [22], // feature
+    2: ["There is a disk or feature",22], // feature
     //: 48, // feature clumpy
     //: 23, // merger
     //: 24, // merger tidal
@@ -71,29 +71,29 @@ var image_offset = {
     //: 26, // other
     //: 27, // lens
     //: 28, // disturbed
-    42: [29], // no
-    41: [30], // yes
+    42: ["No",29], // no
+    41: ["Yes",30], // yes
     //: 31, // ring
-    3: [32], // star
-    27: [33], // edge none
-    26: [34], // edge boxy
-    25: [35], // edge round
-    18: [36], // smooth cigar
-    17: [37], // smooth in-between
-    1: [38], // smooth round
-    16: [38],
-    31: [39], // spiral 1
-    32: [40], // spiral 2
-    33: [41], // spiral 3
-    34: [42], // spiral 4
-    36: [43], // spiral 4+
-    37: [44], // spiral can't tell
-    30: [45], // spiral loose
-    8: [46,30], // yes spiral
-    9: [46,29], // no spiral
-    29: [46], // spiral medium
-    28: [47], // spiral tight
-    0: [48], // All
+    3: ["Star or artifact",32], // star
+    27: ["Edge on with no bulge",33], // edge none
+    26: ["Edge on with boxy bulge",34], // edge boxy
+    25: ["Edge on with round bulge",35], // edge round
+    18: ["Smooth and cigar shaped",36], // smooth cigar
+    17: ["Smooth and in-between shaped",37], // smooth in-between
+    1: ["Smooth",38], // smooth round
+    16: ["Smooth and round shaped",38],
+    8: ["Has spiral arm(s)",46,30], // yes spiral
+    9: ["Has no spiral arm(s)",46,29], // no spiral
+    31: ["1 spiral arm",39], // spiral 1
+    32: ["2 spiral arms",40], // spiral 2
+    33: ["3 spiral arms",41], // spiral 3
+    34: ["4 spiral arms",42], // spiral 4
+    36: ["5+ spiral arms",43], // spiral 5+
+    37: ["Can not tell how many spiral arms",44], // spiral can't tell
+    30: ["Loose spiral arms",45], // spiral loose
+    29: ["Medium spiral arms",46], // spiral medium
+    28: ["Tight spiral arms",47], // spiral tight
+    0: ["All",48], // All
 }
 
 var formatNumber = d3.format(",.0f"),
@@ -263,7 +263,7 @@ function updateData(gal_id){
 	gimage.append("image")
 	    .attr("xlink:href", "images/workflow.png")
 	    .attr("x", -50)
-	    .attr("y", function(d) { return d.answer_id ? -image_offset[d.answer_id][0]*100-50 : -image_offset[0][0]*100-50; })
+	    .attr("y", function(d) { return d.answer_id ? -image_offset[d.answer_id][1]*100-50 : -image_offset[0][1]*100-50; })
 	    .attr("clip-path", function(d) { return "url(#myClip" + d.node_id + ")"; })
 	    .attr("width", 100)
 	    .attr("height", 4900);
@@ -273,17 +273,19 @@ function updateData(gal_id){
 	    .attr("x", -50)
 	    .attr("y", function(d) { 
 		if (d.answer_id) {
-		    return image_offset[d.answer_id][1] ? -image_offset[d.answer_id][1]*100-50 : 100;
+		    return image_offset[d.answer_id][2] ? -image_offset[d.answer_id][2]*100-50 : 100;
 		} else {
 		    return 100;
 		}
 	    })
 	    .attr("clip-path", function(d) { return "url(#myClip" + d.node_id + ")"; })
 	    .attr("width", 100)
-	    .attr("height", 4900);
+	    .attr("height", 4900)
+	    .attr("opacity", .65);
 
 	genter.append("title")
-	    .text(function(d, i) { return (d.targetLinks.length>0 || i==0) ? d.name + ": " + d.value*Total_value: ""; });
+	    .text(function(d) { return d.answer_id ? image_offset[d.answer_id][0] + ": " + d.value*Total_value : image_offset[0][0] + ": " + d.value*Total_value; })
+	    //.text(function(d, i) { return (d.targetLinks.length>0 || i==0) ? d.name + ": " + d.value*Total_value: ""; });
 	//genter.append("text")
 	//    .attr("text-anchor", function(d) { return d.sourceLinks.length>0 ? "middle" : "left";})
 	//    .attr("dx", function(d) { return d.sourceLinks.length>0 ? 0 : d.radius * .6;})
