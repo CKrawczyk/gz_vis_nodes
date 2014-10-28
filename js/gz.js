@@ -19,7 +19,7 @@ function cleanArray(actual){
 }
 
 var margin = {top: 1, right: 1, bottom: 6, left: 1},
-	width = 1030 - margin.left - margin.right,
+	width = 1130 - margin.left - margin.right,
 	height = 700 - margin.top - margin.bottom;
 
 var color = d3.scale.category20();
@@ -27,30 +27,43 @@ var color = d3.scale.category20();
 // create a dictionary pointing the answer_id do the 
 // image offset in workflow.png
 var image_offset = {
-    13: 0, // Bulge Dominate
-    12: 1, // Bulge Obvious
-    11: 2, // Bulge Just Noticeable
-    10: 3, // No Bulge
-    59: 4, // clump spiral
+    13: [0], // Bulge Dominate
+    12: [1], // Bulge Obvious
+    11: [2], // Bulge Just Noticeable
+    10: [3], // No Bulge
+    59: [4], // clump spiral
     //: 5, // clump not-embedded
+    57: [5,29], // no not-embedded (hate dubble neg...) 
+    58: [5,30], // yes not-embedded
     //: 6, // clump symmetrical
+    55: [6,30], // yes symmetrical
+    56: [6,29], // no symmetrical
     //: 7, // clump bright-center
+    45: [7,30], // yes bright-center
+    46: [7,29], // no bright-center
     //: 8, // clump one-brighter
-    49: 9, // clump cluster
-    48: 10, // clump chain
-    47: 11, // clump line
-    54: 12, // clump can't tell
-    53: 13, // clump 4+
-    4: 13,
-    52: 14, // clump 4
-    51: 15, // clump 3
-    50: 16, // clump 2
-    60: 17, // clump 1
-    6: 18, // spiral bar
+    43: [8,30], // yes one clump brighter
+    44: [8,29], // no one clump brighter
+    49: [9], // clump cluster
+    48: [10], // clump chain
+    47: [11], // clump line
+    54: [12], // clump can't tell
+    53: [13], // clump 4+
+    4: [35,30], // yes edge
+    5: [35,29], //no edge
+    39: [13,30], // yes edge on
+    40: [13,29], // no edge on
+    52: [14], // clump 4
+    51: [15], // clump 3
+    50: [16], // clump 2
+    60: [17], // clump 1
+    6: [19,30], // yes bar
+    7: [19,29], // no bar
+    //: 18, // spiral bar
     //: 19, // smooth bar
     //: 20, // dustlane
     //: 21, // irregular
-    2: 22, // feature
+    2: [22], // feature
     //: 48, // feature clumpy
     //: 23, // merger
     //: 24, // merger tidal
@@ -58,41 +71,29 @@ var image_offset = {
     //: 26, // other
     //: 27, // lens
     //: 28, // disturbed
-    5: 29, // no
-    7: 29,
-    9: 29, 
-    40: 29,
-    42: 29,
-    44: 29,
-    46: 29,
-    56: 29,
-    58: 29,
-    39: 30, // yes
-    41: 30,
-    43: 30,
-    45: 30,
-    55: 30,
-    57: 30,
+    42: [29], // no
+    41: [30], // yes
     //: 31, // ring
-    3: 32, // star
-    27: 33, // edge none
-    26: 34, // edge boxy
-    25: 35, // edge round
-    18: 36, // smooth cigar
-    17: 37, // smooth in-between
-    1: 38, // smooth round
-    16: 38,
-    31: 39, // spiral 1
-    32: 40, // spiral 2
-    33: 41, // spiral 3
-    34: 42, // spiral 4
-    36: 43, // spiral 4+
-    37: 44, // spiral can't tell
-    30: 45, // spiral loose
-    8: 46, // spiral medium
-    29: 46,
-    28: 47, // spiral tight
-    0: 44, // All
+    3: [32], // star
+    27: [33], // edge none
+    26: [34], // edge boxy
+    25: [35], // edge round
+    18: [36], // smooth cigar
+    17: [37], // smooth in-between
+    1: [38], // smooth round
+    16: [38],
+    31: [39], // spiral 1
+    32: [40], // spiral 2
+    33: [41], // spiral 3
+    34: [42], // spiral 4
+    36: [43], // spiral 4+
+    37: [44], // spiral can't tell
+    30: [45], // spiral loose
+    8: [46,30], // yes spiral
+    9: [46,29], // no spiral
+    29: [46], // spiral medium
+    28: [47], // spiral tight
+    0: [48], // All
 }
 
 var formatNumber = d3.format(",.0f"),
@@ -251,27 +252,43 @@ function updateData(gal_id){
 	    .append("circle")
 	    .attr("cx", 0)
 	    .attr("cy", 0)
-	    .attr("r", 40);
+	    .attr("r", 45);
 
 	gimage.append("circle")
 	    .attr("color", "black")
 	    .attr("cx", 0)
 	    .attr("cy", 0)
-	    .attr("r",40);
+	    .attr("r",45);
 
 	gimage.append("image")
 	    .attr("xlink:href", "images/workflow.png")
 	    .attr("x", -50)
-	    .attr("y", function(d) { return d.answer_id ? -image_offset[d.answer_id]*100-50 : -image_offset[0]*100-50; })
+	    .attr("y", function(d) { return d.answer_id ? -image_offset[d.answer_id][0]*100-50 : -image_offset[0][0]*100-50; })
+	    .attr("clip-path", function(d) { return "url(#myClip" + d.node_id + ")"; })
+	    .attr("width", 100)
+	    .attr("height", 4900);
+	
+	gimage.append("image")
+	    .attr("xlink:href", "images/workflow.png")
+	    .attr("x", -50)
+	    .attr("y", function(d) { 
+		if (d.answer_id) {
+		    return image_offset[d.answer_id][1] ? -image_offset[d.answer_id][1]*100-50 : 100;
+		} else {
+		    return 100;
+		}
+	    })
 	    .attr("clip-path", function(d) { return "url(#myClip" + d.node_id + ")"; })
 	    .attr("width", 100)
 	    .attr("height", 4900);
 
-	genter.append("text")
-	    .attr("text-anchor", function(d) { return d.sourceLinks.length>0 ? "middle" : "left";})
-	    .attr("dx", function(d) { return d.sourceLinks.length>0 ? 0 : d.radius * .6;})
-	    .attr("dy", ".35em")
+	genter.append("title")
 	    .text(function(d, i) { return (d.targetLinks.length>0 || i==0) ? d.name + ": " + d.value*Total_value: ""; });
+	//genter.append("text")
+	//    .attr("text-anchor", function(d) { return d.sourceLinks.length>0 ? "middle" : "left";})
+	//    .attr("dx", function(d) { return d.sourceLinks.length>0 ? 0 : d.radius * .6;})
+	//    .attr("dy", ".35em")
+	//    .text(function(d, i) { return (d.targetLinks.length>0 || i==0) ? d.name + ": " + d.value*Total_value: ""; });
     
 	force.start();
 	//for (var i = 500; i > 0; --i) force.tick();
@@ -361,7 +378,7 @@ function updateData(gal_id){
 	    ++x;
 	}	  
 	moveSinksRight(x);
-	scaleNodeBreadths(.75*width / (x - 1));
+	scaleNodeBreadths(.87*width / (x - 1));
     };
     
     function moveSinksRight(x) {
