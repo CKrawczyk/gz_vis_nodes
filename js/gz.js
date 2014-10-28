@@ -19,7 +19,7 @@ function cleanArray(actual){
 }
 
 var margin = {top: 1, right: 1, bottom: 6, left: 1},
-	width = 960 - margin.left - margin.right,
+	width = 1030 - margin.left - margin.right,
 	height = 600 - margin.top - margin.bottom;
 
 var color = d3.scale.category20();
@@ -201,13 +201,12 @@ function updateData(gal_id){
 		} else {
 		    j = -1;
 		}
-		if (d.y-d.radius<0 || d.y+d.radius>height) {
-		    a = -.1;
-		} else {
-		    a = 1;
+		delta_y = (5 * d.value - j * .3 * d.group + .5) * ky;
+		d.y_old = d.y;
+		if ((d.y-d.radius<0 && delta_y>0) || (d.y+d.radius>height && delta_y<0)) {
+		    delta_y *= -1
 		}
-		d.y_old = d.y
-		d.y -=  a * (5 * d.value - j * .3 * d.group + .5) * ky;
+		d.y -= delta_y;
 		//if (isNaN(d.y)) {console.log(d.value,d.group,ky)}
 	    });
 

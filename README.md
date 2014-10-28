@@ -7,7 +7,10 @@ The node tree is made using d3 and js.
 
 To run locally open index.html in a browser.
 
-The nodes can be collapsed by clicking on them. Clicking a second time will bring the links back.
+The nodes can be moved by dragging them around and be collapsed by
+clicking on them. Clicking a second time will re-expand the nodes.
+The nodes will try to arrane themselves so the ones with the most voes
+are on top.
 
 There are 3 sliders at the top that can be used to adjust the tree:
 + `Charge`: How much the nodes repel each other
