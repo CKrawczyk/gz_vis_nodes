@@ -7,10 +7,8 @@ body {
   margin: 1em auto 4em auto;
   position: relative;
   width: 1370px;
-}
-
-#body {
-    background-color: #202020;
+  color: #fff;
+  background-color: #202020;
 }
 
 h1 {
@@ -66,8 +64,8 @@ img.galaxy-image {
   float: left;
   border: 1px solid #fff;
   margin-right: 0px;
-  margin-left: 20px;
-  margin-top: 300px;
+  margin-left: 0px;
+  margin-top: 290px;
 }
 
 .attribution {
@@ -199,6 +197,10 @@ blockquote:after {
 
 div label, div input {
     display: block;
+}
+
+input[type='range']::-moz-range-track {
+        background-color: #fff;
 }
 
 div label {
