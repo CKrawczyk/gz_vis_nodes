@@ -6,11 +6,11 @@ body {
   font-family: "Helvetica Neue", Helvetica, sans-serif;
   margin: 1em auto 4em auto;
   position: relative;
-  width: 1350px;
+  width: 1370px;
 }
 
 #body {
-    background-color: #000;
+    background-color: #202020;
 }
 
 h1 {
@@ -64,8 +64,10 @@ aside, #galaxies {
 img.galaxy-image {
   width: 200px;
   float: left;
-  margin-right: 10px;
-  margin-top: 250px;
+  border: 1px solid #fff;
+  margin-right: 0px;
+  margin-left: 20px;
+  margin-top: 300px;
 }
 
 .attribution {
