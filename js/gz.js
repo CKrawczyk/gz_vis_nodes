@@ -20,9 +20,80 @@ function cleanArray(actual){
 
 var margin = {top: 1, right: 1, bottom: 6, left: 1},
 	width = 1030 - margin.left - margin.right,
-	height = 600 - margin.top - margin.bottom;
+	height = 700 - margin.top - margin.bottom;
 
 var color = d3.scale.category20();
+
+// create a dictionary pointing the answer_id do the 
+// image offset in workflow.png
+var image_offset = {
+    13: 0, // Bulge Dominate
+    12: 1, // Bulge Obvious
+    11: 2, // Bulge Just Noticeable
+    10: 3, // No Bulge
+    59: 4, // clump spiral
+    //: 5, // clump not-embedded
+    //: 6, // clump symmetrical
+    //: 7, // clump bright-center
+    //: 8, // clump one-brighter
+    49: 9, // clump cluster
+    48: 10, // clump chain
+    47: 11, // clump line
+    54: 12, // clump can't tell
+    53: 13, // clump 4+
+    4: 13,
+    52: 14, // clump 4
+    51: 15, // clump 3
+    50: 16, // clump 2
+    60: 17, // clump 1
+    6: 18, // spiral bar
+    //: 19, // smooth bar
+    //: 20, // dustlane
+    //: 21, // irregular
+    2: 22, // feature
+    //: 48, // feature clumpy
+    //: 23, // merger
+    //: 24, // merger tidal
+    //: 25, // tidal-debris
+    //: 26, // other
+    //: 27, // lens
+    //: 28, // disturbed
+    5: 29, // no
+    7: 29,
+    9: 29, 
+    40: 29,
+    42: 29,
+    44: 29,
+    46: 29,
+    56: 29,
+    58: 29,
+    39: 30, // yes
+    41: 30,
+    43: 30,
+    45: 30,
+    55: 30,
+    57: 30,
+    //: 31, // ring
+    3: 32, // star
+    27: 33, // edge none
+    26: 34, // edge boxy
+    25: 35, // edge round
+    18: 36, // smooth cigar
+    17: 37, // smooth in-between
+    1: 38, // smooth round
+    16: 38,
+    31: 39, // spiral 1
+    32: 40, // spiral 2
+    33: 41, // spiral 3
+    34: 42, // spiral 4
+    36: 43, // spiral 4+
+    37: 44, // spiral can't tell
+    30: 45, // spiral loose
+    8: 46, // spiral medium
+    29: 46,
+    28: 47, // spiral tight
+    0: 44, // All
+}
 
 var formatNumber = d3.format(",.0f"),
 	format = function(d) { return formatNumber(d) + " galaxies"; },
@@ -112,7 +183,7 @@ function updateData(gal_id){
 	Total_value=root.nodes[0].value
 	root.nodes.forEach(function(node, i) {
 	    node.value /= Total_value;
-	    node.radius = Math.sqrt(M_factor*node.value);
+	    node.radius = 2 * Math.sqrt(M_factor*node.value);
 	    node.node_id = i;
 	});     
 	computeNodeBreadths(root);
@@ -129,15 +200,13 @@ function updateData(gal_id){
 	    }
 	    d.y = (1 - d.value + j * d.group/10) * height/3;
 	});
-	root.nodes[0].x = Math.sqrt(M_factor);
+	root.nodes[0].x = root.nodes[0].radius;
 	root.nodes[0].y = height/2;
 	root.nodes[0].fixed = true;
 	update(root.nodes, root.links);
     });
     
     var diagonal = d3.svg.diagonal()
-	//.source(function(d) { return {"x":Math.max(d.source.radius, d.source.y), "y":d.source.x}; })
-	//.target(function(d) { return {"x":Math.max(d.target.radius, d.target.y), "y":d.target.x}; })
 	.source(function(d) { return {"x":d.source.y, "y":d.source.x}; })
 	.target(function(d) { return {"x":d.target.y, "y":d.target.x}; })
 	.projection(function(d) {return [d.y, d.x]; });
@@ -173,14 +242,34 @@ function updateData(gal_id){
 	    .call(force.drag)
 	    .on("click", click);
 
-	genter.append("circle")
-	    .attr("class", "node")
-            .attr("r", function(d) { return d.radius; })
-            .style("fill", function(d) { return color(d.group); });
+	var gimage = genter.append("g")
+	    .attr("transform", function(d) { return "scale(" + d.radius/50 + ")"; })
+
+	gimage.append("defs")
+	    .append("clipPath")
+	    .attr("id", function(d) { return "myClip" + d.node_id; })
+	    .append("circle")
+	    .attr("cx", 0)
+	    .attr("cy", 0)
+	    .attr("r", 40);
+
+	gimage.append("circle")
+	    .attr("color", "black")
+	    .attr("cx", 0)
+	    .attr("cy", 0)
+	    .attr("r",40);
+
+	gimage.append("image")
+	    .attr("xlink:href", "images/workflow.png")
+	    .attr("x", -50)
+	    .attr("y", function(d) { return d.answer_id ? -image_offset[d.answer_id]*100-50 : -image_offset[0]*100-50; })
+	    .attr("clip-path", function(d) { return "url(#myClip" + d.node_id + ")"; })
+	    .attr("width", 100)
+	    .attr("height", 4900);
 
 	genter.append("text")
 	    .attr("text-anchor", function(d) { return d.sourceLinks.length>0 ? "middle" : "left";})
-	    .attr("dx", function(d) { return d.sourceLinks.length>0 ? 0 : Math.sqrt(M_factor*d.value);})
+	    .attr("dx", function(d) { return d.sourceLinks.length>0 ? 0 : d.radius * .6;})
 	    .attr("dy", ".35em")
 	    .text(function(d, i) { return (d.targetLinks.length>0 || i==0) ? d.name + ": " + d.value*Total_value: ""; });
     
@@ -194,7 +283,7 @@ function updateData(gal_id){
 	   
 	    root.nodes.forEach(function(d, i) {
 		// fix the x value at the depth of the node
-		d.x = d.fixed_x + Math.sqrt(M_factor);
+		d.x = d.fixed_x + root.nodes[0].radius;
 		// move low prob nodes down
 		if (root.nodes[1].value > root.nodes[2].value) { 
 		    j = 1;
@@ -229,7 +318,7 @@ function updateData(gal_id){
 	    link.attr("d",diagonal);
 	};
 	function collide(node) {
-	    var r = node.radius + 100,
+	    var r = node.radius,
 		nx1 = node.x - r,
 		nx2 = node.x + r,
 		ny1 = node.y - r,
@@ -239,12 +328,12 @@ function updateData(gal_id){
 		    var x = node.x - quad.point.x,
 			y = node.y - quad.point.y,
 			l = Math.sqrt(x * x + y * y),
-			r = node.radius + quad.point.radius + 5;
+			r = 0.9*(node.radius + quad.point.radius);
 		    if (l < r) {
 			l = (l - r) / l * .5;
-			node.x -= x *= l;
+			//node.x -= x *= l;
 			node.y -= y *= l;
-			quad.point.x += x;
+			//quad.point.x += x;
 			quad.point.y += y;
 		    }
 		}
