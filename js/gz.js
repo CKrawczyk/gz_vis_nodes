@@ -281,7 +281,7 @@ function updateData(gal_id){
 	    .attr("clip-path", function(d) { return "url(#myClip" + d.node_id + ")"; })
 	    .attr("width", 100)
 	    .attr("height", 4900)
-	    .attr("opacity", .65);
+	    .attr("opacity", .35);
 
 	genter.append("title")
 	    .text(function(d) { return d.answer_id ? image_offset[d.answer_id][0] + ": " + d.value*Total_value : image_offset[0][0] + ": " + d.value*Total_value; })
