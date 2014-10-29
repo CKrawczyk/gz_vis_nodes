@@ -92,6 +92,8 @@ var image_offset = {
 function updateData(gal_id){
     // clear the page
     d3.select("svg").remove();
+    // make sure dropdown list matches this id (useful for refresh)
+    d3.select("#galaxies")[0][0].value=gal_id
 
     // hook up call-bakcs for the slider bars and reset button
     d3.select("#slider_charge").on("input", function() { update_charge(+this.value); })
@@ -451,7 +453,33 @@ function updateData(gal_id){
     };
 };
 
-// hook up the dropdown list to draw a new tree
-$("#galaxies").change(function() {
-    updateData(this.value);  
-});
+// make the dropdown list
+json_list = ['14846', '15335', '15517', '15584', '15588', '16987', '19537',
+	     '19696', '19714', '19989', '20054', '20108', '20190', '20247',
+	     '20257', '20266', '20289', '20327', '20334', '20357', '20411',
+	     '20436', '20460', '20475', '20534', '20589', '20619', '20704',
+	     '20753', '20754', '20772', '20774', '20871', '20918', '20927',
+	     '20986', '21078', '21086', '21165', '21245', '21261', '21291',
+	     '21339', '21364', '21383', '21422', '21430', '21442', '21465',
+	     '21471', '21478', '21482', '21486', '21493', '21504', '21513',
+	     '21515', '21518', '21525', '21528', '21531', '21544', '21550',
+	     '21556', '21559', '21573', '21574', '21575', '21576', '21582',
+	     '21584', '21592', '21597', '21600', '21606', '21612', '21618',
+	     '21620', '21627', '21628', '21634', '21640', '21642', '21645',
+	     '21648', '21654', '21656', '21657', '21658', '21659', '21661',
+	     '21670', '21673', '21804', '21809', '9614']
+
+d3.select("#header")
+    .append("select")
+    .attr("id","galaxies")
+    .selectAll("option")
+    .data(json_list)
+    .enter()
+    .append("option")
+    .attr("value", function(d) { return d; })
+    .text(function(d) { return d; });
+
+d3.select("#galaxies")
+    .on("change", function() {
+	updateData(this.value);
+    });
