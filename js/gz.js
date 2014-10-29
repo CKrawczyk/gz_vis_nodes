@@ -276,7 +276,7 @@ function updateData(gal_id){
 	    .attr("color", "black")
 	    .attr("cx", 0)
 	    .attr("cy", 0)
-	    .attr("r",45);
+	    .attr("r", function(d) { return d.answer_id ? 45 : 100; });
 
 	// add the inital image to the node
 	gimage.append("image")
@@ -468,11 +468,13 @@ json_list = ['14846', '15335', '15517', '15584', '15588', '16987', '19537',
 	     '21584', '21592', '21597', '21600', '21606', '21612', '21618',
 	     '21620', '21627', '21628', '21634', '21640', '21642', '21645',
 	     '21648', '21654', '21656', '21657', '21658', '21659', '21661',
-	     '21670', '21673', '21804', '21809', '9614']
+	     '21670', '21673', '21804', '21809']
 
 // 20927 removed from list since it crashes the browser
 // the links in this file form an infinate loop for my code
 // there must have been bug in the code that made this file
+
+//9614 removed from the list since it does not have an image url
 
 d3.select("#header")
     .append("select")
