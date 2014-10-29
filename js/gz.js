@@ -1,3 +1,4 @@
+// useful function to see if an array contains an object
 Array.prototype.contains = function(obj) {
 	var i = this.length;
 	while (i--) {
@@ -8,25 +9,16 @@ Array.prototype.contains = function(obj) {
 	return false;
 }
 
-function cleanArray(actual){
-  var newArray = new Array();
-  for(var i = 0; i<actual.length; i++){
-	  if (actual[i]){
-		newArray.push(actual[i]);
-	}
-  }
-  return newArray;
-}
-
-var margin = {top: 1, right: 1, bottom: 6, left: 1},
+// set up the margins and such
+var margin = {top: 1, right: 1, bottom: 1, left: 1},
 	width = 1130 - margin.left - margin.right,
 	height = 700 - margin.top - margin.bottom;
 
-var color = d3.scale.category20();
-
-// create a dictionary pointing the answer_id do the 
-// image offset in workflow.png
+// create a dictionary pointing the answer_id to the 
+// image offset in workflow.png and providing a useful
+// mouse over message
 var image_offset = {
+    // format answer_id: [mouse over text, image offset (in pix/100), yes/no overlay offset (if needed)]
     13: ["Bulge dominate",0], // Bulge Dominate
     12: ["Bulge obvious",1], // Bulge Obvious
     11: ["Bulge just noticeable",2], // Bulge Just Noticeable
@@ -96,13 +88,12 @@ var image_offset = {
     0: ["All",48], // All
 }
 
-var formatNumber = d3.format(",.0f"),
-	format = function(d) { return formatNumber(d) + " galaxies"; },
-	color = d3.scale.category20();
-
+// function that takes in a galaxy id and makes the node tree
 function updateData(gal_id){
+    // clear the page
     d3.select("svg").remove();
 
+    // hook up call-bakcs for the slider bars and reset button
     d3.select("#slider_charge").on("input", function() { update_charge(+this.value); })
     d3.select("#slider_strength").on("input", function() { update_strength(+this.value); })
     d3.select("#slider_friction").on("input", function() { update_friction(+this.value); })
@@ -111,7 +102,7 @@ function updateData(gal_id){
     function update_charge(new_val){
 	d3.select("#slider_charge_value").text(new_val);
 	d3.select("#slider_charge").property("value", new_val);
-	force.charge(function(n) {return -1 * new_val * M_factor * n.value});
+	force.charge(function(n) {return -1 * new_val * 1700 * n.value});
 	force.stop();
 	force.start();
     }
@@ -127,6 +118,7 @@ function updateData(gal_id){
     function update_friction(new_val){
 	d3.select("#slider_friction_value").text(new_val);
 	d3.select("#slider_friction").property("value", new_val);
+	// use 1-new_val to make 0 frictionless instead of 1!
 	force.friction(1-new_val);
 	force.stop();
 	force.start();
@@ -136,35 +128,37 @@ function updateData(gal_id){
 	updateData(gal_id);
     }
 
+    // add the draw window
     var svg = d3.select("#body").append("svg")
 	.attr("width", width + margin.left + margin.right)
 	.attr("height", height + margin.top + margin.bottom)
       .append("g")
 	.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+    // create the node tree object
     var force = d3.layout.force()
 	.size([width, height]);
 
+    // update the sliders to default values
     update_charge(2.5);
     update_strength(1);
     update_friction(0.35);
-    
-    var M_factor = 1700;
 
+    // now that the basics are set up read in the json file
     d3.json("data/"+gal_id+".json", function(answers) { 
+	// draw the galaxy image
 	$(".galaxy-image").attr("src", answers.image_url);
 	root = answers;
-	root.fixed = true;
-	root.x = Math.sqrt(M_factor);
-	root.y = height/2;
 	// make sure to minpulate data *before* the update loop
 	// add a list of source and target Links to each node
 	root.nodes.forEach(function(node) {
 	    node.sourceLinks = [];
+	    // _sourceLinks will be used to toggle links on and off
 	    node._sourceLinks = [];
 	    node.targetLinks = [];
 	});
 	root.links.forEach(function(link, i) {
+	    // give each link a unique id
 	    link.link_id = i;
 	    var source = link.source,
 		target = link.target;
@@ -184,47 +178,62 @@ function updateData(gal_id){
 	Total_value=root.nodes[0].value
 	root.nodes.forEach(function(node, i) {
 	    node.value /= Total_value;
-	    node.radius = 2 * Math.sqrt(M_factor*node.value);
+	    // set the radius such that 18 full sized nodes could fit
+	    node.radius = width * Math.sqrt(node.value) / 18;
 	    node.node_id = i;
 	});     
+	// get the x position for each node
 	computeNodeBreadths(root);
+	// find how deep the tree goes and set the linkDistance to match 
 	max_level = d3.max(root.nodes, function(d) {return d.fixed_level; });
 	force.linkDistance(.8*width/(max_level + 1));
 	
 	// good starting points
 	root.nodes.forEach(function(d , i) {
 	    d.x = d.fixed_x;
+	    // find if smooth or spiral is voted the most
+	    // and put that group on top
 	    if (root.nodes[1].value > root.nodes[2].value) { 
 		j = 1;
 	    } else {
 		j = -1;
 	    }
-	    d.y = (1 - d.value + j * d.group/10) * height/3;
+	    // set the y position such that higher vote values
+	    // are on top, and (to a lesser extent) the groups
+	    // stay together
+	    d.y = (1 - d.value + j * d.group/10) * height/2;
 	});
+	// fix the first node so it does not move
 	root.nodes[0].x = root.nodes[0].radius;
 	root.nodes[0].y = height/2;
 	root.nodes[0].fixed = true;
+	// run the call-back function to update positions
 	update(root.nodes, root.links);
     });
     
+    // make the links long nice by using diagonal
+    // swap x and y so the curve goes the propper way
     var diagonal = d3.svg.diagonal()
 	.source(function(d) { return {"x":d.source.y, "y":d.source.x}; })
 	.target(function(d) { return {"x":d.target.y, "y":d.target.x}; })
 	.projection(function(d) {return [d.y, d.x]; });
 
+    // select the link and gnode objects
     var link = svg.selectAll(".link"),
 	gnode = svg.selectAll(".gnode");
 
+    // create the update function to draw the tree
     function update(nodes_in, links_in) {
-	var n = root.nodes.length;
-	
+	// add the nodes and links to the tree
 	force
 	    .nodes(nodes_in)
 	    .links(links_in)
 	    .on("tick", tick);
 
+	// set the data for the links (with unique ids)
 	link = link.data(links_in, function(d) { return d.link_id; });
 	
+	// add a path object to each link
 	link.enter().insert("path", ".gnode")
             .attr("class", "link")
 	    .attr("d", diagonal)
@@ -233,19 +242,24 @@ function updateData(gal_id){
 	// Exit any old links
 	link.exit().remove();
 
+	// set the data for the nodes (with unique ids)
 	gnode = gnode.data(nodes_in, function(d) { return d.node_id; });
 
 	// Exit any old nodes
 	gnode.exit().remove();
       
+	// add a group to the node to translate it
 	var genter = gnode.enter().append("g")
 	    .attr("class","gnode")
 	    .call(force.drag)
 	    .on("click", click);
 
+	// add a group to the node to scale it
+	// with this scaling the image (with r=50px) will have the propper radius
 	var gimage = genter.append("g")
 	    .attr("transform", function(d) { return "scale(" + d.radius/50 + ")"; })
 
+	// add a clipPath for a circle to corp the node image
 	gimage.append("defs")
 	    .append("clipPath")
 	    .attr("id", function(d) { return "myClip" + d.node_id; })
@@ -254,12 +268,14 @@ function updateData(gal_id){
 	    .attr("cy", 0)
 	    .attr("r", 45);
 
+	// add a black circle in the background
 	gimage.append("circle")
 	    .attr("color", "black")
 	    .attr("cx", 0)
 	    .attr("cy", 0)
 	    .attr("r",45);
 
+	// add the inital image to the node
 	gimage.append("image")
 	    .attr("xlink:href", "images/workflow.png")
 	    .attr("x", -50)
@@ -268,6 +284,7 @@ function updateData(gal_id){
 	    .attr("width", 100)
 	    .attr("height", 4900);
 	
+	// add the yes/no image if needed
 	gimage.append("image")
 	    .attr("xlink:href", "images/workflow.png")
 	    .attr("x", -50)
@@ -283,59 +300,66 @@ function updateData(gal_id){
 	    .attr("height", 4900)
 	    .attr("opacity", .35);
 
+	// add the mouse over text
 	genter.append("title")
 	    .text(function(d) { return d.answer_id ? image_offset[d.answer_id][0] + ": " + d.value*Total_value : image_offset[0][0] + ": " + d.value*Total_value; })
-	    //.text(function(d, i) { return (d.targetLinks.length>0 || i==0) ? d.name + ": " + d.value*Total_value: ""; });
-	//genter.append("text")
-	//    .attr("text-anchor", function(d) { return d.sourceLinks.length>0 ? "middle" : "left";})
-	//    .attr("dx", function(d) { return d.sourceLinks.length>0 ? 0 : d.radius * .6;})
-	//    .attr("dy", ".35em")
-	//    .text(function(d, i) { return (d.targetLinks.length>0 || i==0) ? d.name + ": " + d.value*Total_value: ""; });
     
+	// start the nodes moving
 	force.start();
 	//for (var i = 500; i > 0; --i) force.tick();
 	//force.stop();
    
+	// call-back to set how the nodes will move
 	function tick(e) {
-	    // Push sources up and targets down to form a weak tree.
+	    // make sure the force gets smaller as the simulation runs
 	    var ky = 10 * e.alpha;
 	   
 	    root.nodes.forEach(function(d, i) {
 		// fix the x value at the depth of the node
+		// and add in the radius of the first node
 		d.x = d.fixed_x + root.nodes[0].radius;
 		// move low prob nodes down
+		// and keep the groups together (to a lesser extent)
 		if (root.nodes[1].value > root.nodes[2].value) { 
 		    j = 1;
 		} else {
 		    j = -1;
 		}
+		// the amount to move the node
 		delta_y = (5 * d.value - j * .3 * d.group + .5) * ky;
+		// store the old position in case something goes wrong
+		// the collision detection can casue NaNs and I am not sure why
 		d.y_old = d.y;
+		// check to make sure the node is not outside the plot area
+		// if it is change the direction of the push
 		if ((d.y-d.radius<0 && delta_y>0) || (d.y+d.radius>height && delta_y<0)) {
 		    delta_y *= -1
 		}
 		d.y -= delta_y;
-		//if (isNaN(d.y)) {console.log(d.value,d.group,ky)}
 	    });
 
+	    // Also do collision detection after a few itterations
 	    if (e.alpha<0.05) {
-		// Also do collision detection after a few itterations
 		var q=d3.geom.quadtree(root.nodes),
 		    i=0,
 		    n=root.nodes.length;
-		
 		while (++i < n) q.visit(collide(root.nodes[i]));
 	    }
+	    
+	    // if the new position is NaN use the previous position
+	    // this prevents links for disappearing
 	    root.nodes.forEach( function(d) {
 		if (isNaN(d.y)) { d.y = d.y_old; }
 	    });
-	    // Translate the groups
+	    
+	    // Translate the node group to the new position
 	    gnode.attr("transform", function(d) {
-		//return 'translate(' + [d.x, Math.max(d.radius, d.y)] + ')'; 
 		return 'translate(' + [d.x, d.y] + ')'; 
 	    });    
 	    link.attr("d",diagonal);
 	};
+	// the collision detection code
+	// found this online and I am not sure how it works
 	function collide(node) {
 	    var r = node.radius,
 		nx1 = node.x - r,
@@ -380,7 +404,8 @@ function updateData(gal_id){
 	    ++x;
 	}	  
 	moveSinksRight(x);
-	scaleNodeBreadths(.87*width / (x - 1));
+	// don't scale to the full width or the nodes go off the page
+	scaleNodeBreadths(.87 * width / (x - 1));
     };
     
     function moveSinksRight(x) {
@@ -398,6 +423,7 @@ function updateData(gal_id){
 	});
     };
     
+    // call-back to collapse/expand nodes
     function click(d) {
 	if (d3.event.defaultPrevented) return;
 	if (d.sourceLinks.length>0) {
@@ -407,6 +433,7 @@ function updateData(gal_id){
 	    d.sourceLinks=d._sourceLinks
 	    d._sourceLinks=[];
 	}
+	// find what nodes and links are still around
 	var current_nodes = [];
 	var current_links = [];
 	function recurse(node) {
@@ -419,10 +446,12 @@ function updateData(gal_id){
 	    }
 	};
 	recurse(root.nodes[0]);
+	// update the nodes
 	update(current_nodes, current_links);
     };
 };
 
+// hook up the dropdown list to draw a new tree
 $("#galaxies").change(function() {
     updateData(this.value);  
 });
