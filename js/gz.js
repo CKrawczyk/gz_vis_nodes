@@ -11,8 +11,8 @@ Array.prototype.contains = function(obj) {
 
 // set up the margins and such
 var margin = {top: 1, right: 1, bottom: 1, left: 1},
-	width = 1200 - margin.left - margin.right,
-	height = 700 - margin.top - margin.bottom;
+	width = 1280 - margin.left - margin.right,
+	height = 720 - margin.top - margin.bottom;
 
 // create a dictionary pointing the answer_id to the 
 // image offset in workflow.png and providing a useful
@@ -459,7 +459,7 @@ json_list = ['14846', '15335', '15517', '15584', '15588', '16987', '19537',
 	     '19696', '19714', '19989', '20054', '20108', '20190', '20247',
 	     '20257', '20266', '20289', '20327', '20334', '20357', '20411',
 	     '20436', '20460', '20475', '20534', '20589', '20619', '20704',
-	     '20753', '20754', '20772', '20774', '20871', '20918',
+	     '20753', '20754', '20772', '20774', '20871', '20918', '20927',
 	     '20986', '21078', '21086', '21165', '21245', '21261', '21291',
 	     '21339', '21364', '21383', '21422', '21430', '21442', '21465',
 	     '21471', '21478', '21482', '21486', '21493', '21504', '21513',
@@ -469,10 +469,6 @@ json_list = ['14846', '15335', '15517', '15584', '15588', '16987', '19537',
 	     '21620', '21627', '21628', '21634', '21640', '21642', '21645',
 	     '21648', '21654', '21656', '21657', '21658', '21659', '21661',
 	     '21670', '21673', '21804', '21809']
-
-// 20927 removed from list since it crashes the browser
-// the links in this file form an infinate loop for my code
-// there must have been bug in the code that made this file
 
 //9614 removed from the list since it does not have an image url
 

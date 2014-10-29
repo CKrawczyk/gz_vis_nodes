@@ -72,7 +72,6 @@
 {"source":9, "target":10, "value":3},
 {"source":9, "target":11, "value":5},
 {"source":9, "target":12, "value":3},
-{"source":14, "target":1, "value":1},
 {"source":21, "target":24, "value":1},
 {"source":22, "target":28, "value":1},
 {"source":24, "target":12, "value":1},
