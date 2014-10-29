@@ -11,7 +11,7 @@ Array.prototype.contains = function(obj) {
 
 // set up the margins and such
 var margin = {top: 1, right: 1, bottom: 1, left: 1},
-	width = 1130 - margin.left - margin.right,
+	width = 1200 - margin.left - margin.right,
 	height = 700 - margin.top - margin.bottom;
 
 // create a dictionary pointing the answer_id to the 
@@ -206,6 +206,7 @@ function updateData(gal_id){
 	    d.y = (1 - d.value + j * d.group/10) * height/2;
 	});
 	// fix the first node so it does not move
+	root.nodes[0].radius = 100
 	root.nodes[0].x = root.nodes[0].radius;
 	root.nodes[0].y = height/2;
 	root.nodes[0].fixed = true;
@@ -259,7 +260,7 @@ function updateData(gal_id){
 	// add a group to the node to scale it
 	// with this scaling the image (with r=50px) will have the propper radius
 	var gimage = genter.append("g")
-	    .attr("transform", function(d) { return "scale(" + d.radius/50 + ")"; })
+	    .attr("transform", function(d) { return d.answer_id ? "scale(" + d.radius/50 + ")" : "scale(" + d.radius/100 + ")"; })
 
 	// add a clipPath for a circle to corp the node image
 	gimage.append("defs")
@@ -268,7 +269,7 @@ function updateData(gal_id){
 	    .append("circle")
 	    .attr("cx", 0)
 	    .attr("cy", 0)
-	    .attr("r", 45);
+	    .attr("r", function(d) { return d.answer_id ? 45 : 100; });
 
 	// add a black circle in the background
 	gimage.append("circle")
@@ -279,12 +280,12 @@ function updateData(gal_id){
 
 	// add the inital image to the node
 	gimage.append("image")
-	    .attr("xlink:href", "images/workflow.png")
-	    .attr("x", -50)
-	    .attr("y", function(d) { return d.answer_id ? -image_offset[d.answer_id][1]*100-50 : -image_offset[0][1]*100-50; })
+	    .attr("xlink:href", function(d) { return d.answer_id ? "images/workflow.png" : root.image_url})
+	    .attr("x", function(d) { return d.answer_id ? -50: -100; })
+	    .attr("y", function(d) { return d.answer_id ? -image_offset[d.answer_id][1]*100-50 : -100; })
 	    .attr("clip-path", function(d) { return "url(#myClip" + d.node_id + ")"; })
-	    .attr("width", 100)
-	    .attr("height", 4900);
+	    .attr("width", function(d) { return d.answer_id ? 100: 200; })
+	    .attr("height", function(d) { return d.answer_id ? 4900: 200; });
 	
 	// add the yes/no image if needed
 	gimage.append("image")
@@ -319,7 +320,7 @@ function updateData(gal_id){
 	    root.nodes.forEach(function(d, i) {
 		// fix the x value at the depth of the node
 		// and add in the radius of the first node
-		d.x = d.fixed_x + root.nodes[0].radius;
+		i!=0 ? d.x = d.fixed_x + root.nodes[0].radius+50 : d.x = d.fixed_x + root.nodes[0].radius;
 		// move low prob nodes down
 		// and keep the groups together (to a lesser extent)
 		if (root.nodes[1].value > root.nodes[2].value) { 
@@ -407,7 +408,7 @@ function updateData(gal_id){
 	}	  
 	moveSinksRight(x);
 	// don't scale to the full width or the nodes go off the page
-	scaleNodeBreadths(.87 * width / (x - 1));
+	scaleNodeBreadths(.87 * (width-50) / (x - 1));
     };
     
     function moveSinksRight(x) {
@@ -469,7 +470,9 @@ json_list = ['14846', '15335', '15517', '15584', '15588', '16987', '19537',
 	     '21648', '21654', '21656', '21657', '21658', '21659', '21661',
 	     '21670', '21673', '21804', '21809', '9614']
 
-// 20927 removed from list since it crashes the browser, not sure why
+// 20927 removed from list since it crashes the browser
+// the links in this file form an infinate loop for my code
+// there must have been bug in the code that made this file
 
 d3.select("#header")
     .append("select")

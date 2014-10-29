@@ -1,12 +1,12 @@
 html {
-  min-width: 1250px;
+  min-width: 1200px;
 }
 
 body {
   font-family: "Helvetica Neue", Helvetica, sans-serif;
-  margin: 1em auto 4em auto;
+  margin: 1em auto 1em auto;
   position: relative;
-  width: 1370px;
+  width: 1200px;
   color: #fff;
   background-color: #202020;
 }
@@ -57,15 +57,6 @@ aside, #galaxies {
 
 #galaxies {
   top: 40px;
-}
-
-img.galaxy-image {
-  width: 200px;
-  float: left;
-  border: 1px solid #fff;
-  margin-right: 0px;
-  margin-left: 0px;
-  margin-top: 290px;
 }
 
 .attribution {
@@ -184,15 +175,6 @@ blockquote:after {
 
 .link:hover {
     stroke-opacity: .3;
-}
-
-.gnode text {
-    text-shadow: 
-    -1px -1px 0 #fff,
-     1px -1px 0 #fff,
-     -1px 1px 0 #fff,
-      1px 1px 0 #fff;
-    font-size: 9pt;
 }
 
 div label, div input {
