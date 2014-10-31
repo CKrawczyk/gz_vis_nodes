@@ -25,6 +25,10 @@ var zoo = 2;
 var json_list;
 var image_offset;
 set_zoo();
+d3.select("#zoo_1").on("change", function() { 
+    zoo = 1; 
+    set_zoo();
+})
 d3.select("#zoo_2").on("change", function() { 
     zoo = 2; 
     set_zoo();
@@ -33,9 +37,14 @@ d3.select("#zoo_3").on("change", function() {
     zoo = 3; 
     set_zoo();
 })
-
+d3.select("#zoo_4").on("change", function() { 
+    zoo = 4; 
+    set_zoo();
+})
 function set_zoo() {
-    if (zoo == 3) {
+    if (zoo == 1) {
+	json_list = []
+    } else if (zoo == 3) {
     // make the dropdown list
 	json_list = ['14846', '15335', '15517', '15584', '15588', '16987', '19537',
 		     '19696', '19714', '19989', '20054', '20108', '20190', '20247',
@@ -78,6 +87,8 @@ function set_zoo() {
 		     '588017978901528612', '587725474420097049', '587726014532550731', '588017565483859979', 
 		     '588017703482032232', '587735344799350868', '587741722823819271', '588017569236910085', 
 		     '587731870707089488', '588848899380084803', '587735696440623158']
+    } else if (zoo == 4) {
+	json_list = []
     }
     
     header = header.data(json_list, function(d) { return d; })

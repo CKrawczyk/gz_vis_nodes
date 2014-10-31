@@ -237,9 +237,10 @@ button {
     position: absolute;
     left: -10000px;
 }
-
+#zoo_1:focus ~ .tabs #zoo1_tab,
 #zoo_2:focus ~ .tabs #zoo2_tab,
-#zoo_3:focus ~ .tabs #zoo3_tab {
+#zoo_3:focus ~ .tabs #zoo3_tab,
+#zoo_4:focus ~ .tabs #zoo4_tab {
     box-shadow: 0 0 3px 3px rgba(0,127,255,.5);
 }
 
@@ -251,11 +252,15 @@ button {
     cursor: hand;
     cursor: pointer;
 }
+
 .radio-tabs .tab:hover {
     background-color: #666;
 }
+
+#zoo_1:checked ~ .tabs #zoo1_tab,
 #zoo_2:checked ~ .tabs #zoo2_tab,
-#zoo_3:checked ~ .tabs #zoo3_tab {
+#zoo_3:checked ~ .tabs #zoo3_tab,
+#zoo_4:checked ~ .tabs #zoo4_tab {
     background-color: #fff;
     color: #000;
     cursor: default;
