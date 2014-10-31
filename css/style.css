@@ -232,3 +232,32 @@ button {
     margin-top: 5px;
     font-size: 13pt;
 }
+
+.radio-tabs .tab_old {
+    position: absolute;
+    left: -10000px;
+}
+
+#zoo_2:focus ~ .tabs #zoo2_tab,
+#zoo_3:focus ~ .tabs #zoo3_tab {
+    box-shadow: 0 0 3px 3px rgba(0,127,255,.5);
+}
+
+.radio-tabs .tab {
+    display: inline-block;
+    padding: .5em;
+    vertical-align: top;
+    background-color: #555;
+    cursor: hand;
+    cursor: pointer;
+}
+.radio-tabs .tab:hover {
+    background-color: #666;
+}
+#zoo_2:checked ~ .tabs #zoo2_tab,
+#zoo_3:checked ~ .tabs #zoo3_tab {
+    background-color: #fff;
+    color: #000;
+    cursor: default;
+}
+
