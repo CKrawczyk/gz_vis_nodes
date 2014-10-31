@@ -14,79 +14,58 @@ var margin = {top: 1, right: 1, bottom: 1, left: 1},
 	width = 1280 - margin.left - margin.right,
 	height = 720 - margin.top - margin.bottom;
 
-// create a dictionary pointing the answer_id to the 
+//what version of galaxy zoo are we working with
+var zoo = 2
+
+if (zoo == 3) {
+    // make the dropdown list
+    json_list = ['14846', '15335', '15517', '15584', '15588', '16987', '19537',
+		 '19696', '19714', '19989', '20054', '20108', '20190', '20247',
+		 '20257', '20266', '20289', '20327', '20334', '20357', '20411',
+		 '20436', '20460', '20475', '20534', '20589', '20619', '20704',
+		 '20753', '20754', '20772', '20774', '20871', '20918', '20927',
+		 '20986', '21078', '21086', '21165', '21245', '21261', '21291',
+		 '21339', '21364', '21383', '21422', '21430', '21442', '21465',
+		 '21471', '21478', '21482', '21486', '21493', '21504', '21513',
+		 '21515', '21518', '21525', '21528', '21531', '21544', '21550',
+		 '21556', '21559', '21573', '21574', '21575', '21576', '21582',
+		 '21584', '21592', '21597', '21600', '21606', '21612', '21618',
+		 '21620', '21627', '21628', '21634', '21640', '21642', '21645',
+		 '21648', '21654', '21656', '21657', '21658', '21659', '21661',
+		 '21670', '21673', '21804', '21809']
+    
+    //9614 removed from the list since it does not have an image url
+} else if (zoo == 2) {
+    json_list = ['588017703996096547', '587738569780428805', '587735695913320507', '587742775634624545',
+		 '587732769983889439', '588017725475782665', '588017702391578633', '588297864730181658', 
+		 '588017704545812500', '588017566564155399']
+}
+
+d3.select("#header")
+    .append("select")
+    .attr("id","galaxies")
+    .selectAll("option")
+    .data(json_list)
+    .enter()
+    .append("option")
+    .attr("value", function(d) { return d; })
+    .text(function(d) { return d; });
+
+d3.select("#galaxies")
+    .on("change", function() {
+	updateData(this.value);
+    });
+
+//load the first item of the list by default
+function run_default() {
+    updateData(json_list[0]);
+};
+
+// read in file that maps the answer_id to the 
 // image offset in workflow.png and providing a useful
 // mouse over message
-var image_offset = {
-    // format answer_id: [mouse over text, image offset (in pix/100), yes/no overlay offset (if needed)]
-    13: ["Bulge dominate",0], // Bulge Dominate
-    12: ["Bulge obvious",1], // Bulge Obvious
-    11: ["Bulge just noticeable",2], // Bulge Just Noticeable
-    10: ["No bulge",3], // No Bulge
-    59: ["Clumps spiral-shaped",4], // clump spiral
-    //: 5, // clump not-embedded
-    57: ["Clumps embedded",5,29], // no not-embedded (hate dubble neg...) 
-    58: ["Clumps not embedded",5,30], // yes not-embedded
-    //: 6, // clump symmetrical
-    55: ["Clumps symmetrical",6,30], // yes symmetrical
-    56: ["Clumps not symmetrical",6,29], // no symmetrical
-    //: 7, // clump bright-center
-    45: ["Clumps have bright center",7,30], // yes bright-center
-    46: ["Clumps do not have bright center",7,29], // no bright-center
-    //: 8, // clump one-brighter
-    43: ["One clump is brighter",8,30], // yes one clump brighter
-    44: ["One clump is not brighter",8,29], // no one clump brighter
-    49: ["Clumps are clustered",9], // clump cluster
-    48: ["Clumps from a chain",10], // clump chain
-    47: ["Clumps are in a line",11], // clump line
-    54: ["Can not tell how many clumps",12], // clump can't tell
-    39: ["There are clumps",13,30], // yes clumps
-    40: ["There are no clumps",13,29], // no clumps
-    53: ["5+ Clumps",13], // clump 5+
-    52: ["4 Clumps",14], // clump 4
-    51: ["3 Clumps",15], // clump 3
-    50: ["2 Clumps",16], // clump 2
-    60: ["1 Clump",17], // clump 1
-    4: ["The disk is edge on",35,30], // yes edge
-    5: ["The disk is face on",35,29], //no edge
-    6: ["There is a bar",18,30], // yes bar
-    7: ["There is no bar",18,29], // no bar
-    //: 18, // spiral bar
-    //: 19, // smooth bar
-    //: 20, // dustlane
-    //: 21, // irregular
-    2: ["There is a disk or feature",22], // feature
-    //: 48, // feature clumpy
-    //: 23, // merger
-    //: 24, // merger tidal
-    //: 25, // tidal-debris
-    //: 26, // other
-    //: 27, // lens
-    //: 28, // disturbed
-    42: ["No",29], // no
-    41: ["Yes",30], // yes
-    //: 31, // ring
-    3: ["Star or artifact",32], // star
-    27: ["Edge on with no bulge",33], // edge none
-    26: ["Edge on with boxy bulge",34], // edge boxy
-    25: ["Edge on with round bulge",35], // edge round
-    18: ["Smooth and cigar shaped",36], // smooth cigar
-    17: ["Smooth and in-between shaped",37], // smooth in-between
-    1: ["Smooth",38], // smooth round
-    16: ["Smooth and round shaped",38],
-    8: ["Has spiral arm(s)",46,30], // yes spiral
-    9: ["Has no spiral arm(s)",46,29], // no spiral
-    31: ["1 spiral arm",39], // spiral 1
-    32: ["2 spiral arms",40], // spiral 2
-    33: ["3 spiral arms",41], // spiral 3
-    34: ["4 spiral arms",42], // spiral 4
-    36: ["5+ spiral arms",43], // spiral 5+
-    37: ["Can not tell how many spiral arms",44], // spiral can't tell
-    30: ["Loose spiral arms",45], // spiral loose
-    29: ["Medium spiral arms",46], // spiral medium
-    28: ["Tight spiral arms",47], // spiral tight
-    0: ["All",48], // All
-}
+var image_offset 
+d3.json("config/zoo"+zoo+"_offset.json", function(d){ image_offset = d; });
 
 // function that takes in a galaxy id and makes the node tree
 function updateData(gal_id){
@@ -146,8 +125,14 @@ function updateData(gal_id){
     update_strength(1);
     update_friction(0.35);
 
+    if (zoo==3) {
+	file_name="data/"+gal_id+".json";
+    } else if (zoo==2){
+	file_name="raw_data/json/"+gal_id+".json"
+    }
+
     // now that the basics are set up read in the json file
-    d3.json("data/"+gal_id+".json", function(answers) { 
+    d3.json(file_name, function(answers) { 
 	// draw the galaxy image
 	$(".galaxy-image").attr("src", answers.image_url);
 	root = answers;
@@ -171,10 +156,14 @@ function updateData(gal_id){
 	});
 	// Get the number of votes for each node
 	root.nodes.forEach(function(node) {
-	    node.value = Math.max(
-		d3.sum(node.sourceLinks, function(L) {return L.value}),
-		d3.sum(node.targetLinks, function(L) {return L.value})
-	    );
+	    if (zoo==3) {
+		node.value = Math.max(
+		    d3.sum(node.sourceLinks, function(L) {return L.value}),
+		    d3.sum(node.targetLinks, function(L) {return L.value})
+		);
+	    } else if (zoo==2) {
+		node.value = node.votes[0]
+	    }
 	});
 	// Normalize votes by total number
 	Total_value=root.nodes[0].value
@@ -454,35 +443,4 @@ function updateData(gal_id){
     };
 };
 
-// make the dropdown list
-json_list = ['14846', '15335', '15517', '15584', '15588', '16987', '19537',
-	     '19696', '19714', '19989', '20054', '20108', '20190', '20247',
-	     '20257', '20266', '20289', '20327', '20334', '20357', '20411',
-	     '20436', '20460', '20475', '20534', '20589', '20619', '20704',
-	     '20753', '20754', '20772', '20774', '20871', '20918', '20927',
-	     '20986', '21078', '21086', '21165', '21245', '21261', '21291',
-	     '21339', '21364', '21383', '21422', '21430', '21442', '21465',
-	     '21471', '21478', '21482', '21486', '21493', '21504', '21513',
-	     '21515', '21518', '21525', '21528', '21531', '21544', '21550',
-	     '21556', '21559', '21573', '21574', '21575', '21576', '21582',
-	     '21584', '21592', '21597', '21600', '21606', '21612', '21618',
-	     '21620', '21627', '21628', '21634', '21640', '21642', '21645',
-	     '21648', '21654', '21656', '21657', '21658', '21659', '21661',
-	     '21670', '21673', '21804', '21809']
 
-//9614 removed from the list since it does not have an image url
-
-d3.select("#header")
-    .append("select")
-    .attr("id","galaxies")
-    .selectAll("option")
-    .data(json_list)
-    .enter()
-    .append("option")
-    .attr("value", function(d) { return d; })
-    .text(function(d) { return d; });
-
-d3.select("#galaxies")
-    .on("change", function() {
-	updateData(this.value);
-    });
