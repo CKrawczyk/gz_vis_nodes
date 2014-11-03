@@ -41,6 +41,7 @@ d3.select("#zoo_4").on("change", function() {
     zoo = 4; 
     set_zoo();
 })
+
 function set_zoo() {
     if (zoo == 1) {
 	json_list = []
@@ -62,6 +63,9 @@ function set_zoo() {
 		     '21670', '21673', '21804', '21809']
     
 	//9614 removed from the list since it does not have an image url
+	d3.select("#weight_raw").property("checked",1)
+	d3.select("#weight_weighted").property("disabled",1)
+	d3.select("#weight_bias").property("disabled",1)
     } else if (zoo == 2) {
 	json_list = ['588017703996096547', '587738569780428805', '587735695913320507', '587742775634624545', 
 		     '587732769983889439', '588017725475782665', '588017702391578633', '588297864730181658', 
@@ -87,6 +91,9 @@ function set_zoo() {
 		     '588017978901528612', '587725474420097049', '587726014532550731', '588017565483859979', 
 		     '588017703482032232', '587735344799350868', '587741722823819271', '588017569236910085', 
 		     '587731870707089488', '588848899380084803', '587735696440623158']
+	d3.select("#weight_raw").property("checked",1)
+	d3.select("#weight_weighted").property("disabled",0)
+	d3.select("#weight_bias").property("disabled",1)
     } else if (zoo == 4) {
 	json_list = []
     }
@@ -123,7 +130,7 @@ function updateData(gal_id){
     // clear the page
     d3.select("svg").remove();
     // make sure dropdown list matches this id (useful for refresh)
-    d3.select("#galaxies")[0][0].value=gal_id
+    d3.select("#galaxies").property("value",gal_id)
 
     // hook up call-bakcs for the slider bars and reset button
     d3.select("#slider_charge").on("input", function() { update_charge(+this.value); })
@@ -213,7 +220,14 @@ function updateData(gal_id){
 		    d3.sum(node.targetLinks, function(L) {return L.value})
 		);
 	    } else if (zoo==2) {
-		node.value = node.votes[0]
+		// Pick the vote weighting
+		if (d3.select("#weight_raw").property("checked")) {
+		    node.value = node.votes[0];
+		} else if (d3.select("#weight_weighted").property("checked")) {
+		    node.value = node.votes[1];
+		} else {
+		    node.value = node.votes[2];
+		}
 	    }
 	});
 	// Normalize votes by total number
@@ -223,6 +237,20 @@ function updateData(gal_id){
 	    // set the radius such that 18 full sized nodes could fit
 	    node.radius = width * Math.sqrt(node.value) / 18;
 	    node.node_id = i;
+	    if (zoo==2) {
+		node._radius = []
+		node._values = []
+		total_votes = root.nodes[0].votes
+		node.votes.forEach(function(v,idx) {
+		    if (i==0) {
+			node._radius.push(100); // first node always 100
+			node._values.push(1); //
+		    } else {
+			node._values.push(v/total_votes[idx]);
+			node._radius.push(width * Math.sqrt(v/total_votes[idx]) /18);
+		    }
+		})
+	    }
 	});     
 	// get the x position for each node
 	computeNodeBreadths(root);
@@ -344,7 +372,7 @@ function updateData(gal_id){
 	    .attr("opacity", .35);
 
 	// add the mouse over text
-	genter.append("title")
+	var mouse_over = genter.append("title")
 	    .text(function(d) { return d.answer_id ? image_offset[d.answer_id][0] + ": " + d.value*Total_value : image_offset[0][0] + ": " + d.value*Total_value; })
     
 	// start the nodes moving
@@ -352,6 +380,22 @@ function updateData(gal_id){
 	//for (var i = 500; i > 0; --i) force.tick();
 	//force.stop();
    
+	d3.select("#weight_raw").on("change", function() { set_weight(0); })
+	d3.select("#weight_weighted").on("change", function() { set_weight(1); })
+	d3.select("#weight_bias").on("change", function() { set_weight(2); })
+
+	// call-back to swap weighting
+	function set_weight(idx) {
+	    root.nodes.forEach(function(n) {
+		n.radius = n._radius[idx];
+		n.value = n._values[idx];
+		gimage.attr("transform", function(d) { return d.answer_id ? "scale(" + d.radius/50 + ")" : "scale(" + d.radius/100 + ")"; });
+		link.style("stroke-width", function(d) { return .5 * Math.min(d.target.radius, d.source.radius); });
+		mouse_over.text(function(d) { return d.answer_id ? image_offset[d.answer_id][0] + ": " + d.votes[idx] : image_offset[0][0] + ": " + d.votes[idx]; })
+	    });
+	    update_charge(d3.select("#slider_charge").property("value"));
+	}
+
 	// call-back to set how the nodes will move
 	function tick(e) {
 	    // make sure the force gets smaller as the simulation runs
@@ -465,7 +509,7 @@ function updateData(gal_id){
 	    node.fixed_x *= kx;
 	});
     };
-    
+
     // call-back to collapse/expand nodes
     function click(d) {
 	if (d3.event.defaultPrevented) return;

@@ -10,7 +10,7 @@
 </header>
 <h1>Node Tree: Galaxy Zoo</h1>
 
-<div class="radio-tabs">
+<div class="radio-tabs" id="zoo_tabs">
   <input class="tab_old" type="radio" title="Zoo 1" name="zoo_tab" id="zoo_1" disabled />
   <input class="tab_old" type="radio" title="Zoo 2" name="zoo_tab" id="zoo_2" checked />
   <input class="tab_old" type="radio" title="Zoo 3" name="zoo_tab" id="zoo_3" />
@@ -23,6 +23,17 @@
   </div>
 </div>
 
+<div class="radio-tabs" id="weight_tabs">
+  <input class="tab_old" type="radio" title="Raw"      name="weight_tab" id="weight_raw" checked />
+  <input class="tab_old" type="radio" title="Weighted" name="weight_tab" id="weight_weighted" />
+  <input class="tab_old" type="radio" title="Bias"     name="weight_tab" id="weight_bias"  disabled/>  
+  <div class="tabs">
+    <label for="weight_raw"      id="raw_tab"      class="tab">Raw Votes</label>
+    <label for="weight_weighted" id="weighted_tab" class="tab">Weighted Votes</label>
+    <label for="weight_bias"     id="bias_tab"     class="tab">Bias Corrected Votes</label>
+  </div>
+</div>
+<br style="clear:both;" />
 <div id="tree">
   <div id="sliders">
   <div style="float:left; margin-right:50px;">

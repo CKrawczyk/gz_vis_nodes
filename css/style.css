@@ -240,13 +240,17 @@ button {
 #zoo_1:focus ~ .tabs #zoo1_tab,
 #zoo_2:focus ~ .tabs #zoo2_tab,
 #zoo_3:focus ~ .tabs #zoo3_tab,
-#zoo_4:focus ~ .tabs #zoo4_tab {
+#zoo_4:focus ~ .tabs #zoo4_tab,
+#weight_raw:focus ~ .tabs #raw_tab,
+#weight_weighted:focus ~ .tabs #weighted_tab,
+#weight_bias:focus ~ .tabs #bias_tab {
     box-shadow: 0 0 3px 3px rgba(0,127,255,.5);
 }
 
 .radio-tabs .tab {
     display: inline-block;
     padding: .5em;
+    margin-bottom: 5px;
     vertical-align: top;
     background-color: #555;
     cursor: hand;
@@ -257,12 +261,36 @@ button {
     background-color: #666;
 }
 
+#zoo_1:disabled ~ .tabs #zoo1_tab,
+#zoo_2:disabled ~ .tabs #zoo2_tab,
+#zoo_3:disabled ~ .tabs #zoo3_tab,
+#zoo_4:disabled ~ .tabs #zoo4_tab,
+#weight_raw:disabled ~ .tabs #raw_tab,
+#weight_weighted:disabled ~ .tabs #weighted_tab,
+#weight_bias:disabled ~ .tabs #bias_tab {
+    background-color: #333;
+    color: #444;
+    cursor: default;
+}
+
 #zoo_1:checked ~ .tabs #zoo1_tab,
 #zoo_2:checked ~ .tabs #zoo2_tab,
 #zoo_3:checked ~ .tabs #zoo3_tab,
-#zoo_4:checked ~ .tabs #zoo4_tab {
+#zoo_4:checked ~ .tabs #zoo4_tab,
+#weight_raw:checked ~ .tabs #raw_tab,
+#weight_weighted:checked ~ .tabs #weighted_tab,
+#weight_bias:checked ~ .tabs #bias_tab {
     background-color: #fff;
     color: #000;
     cursor: default;
 }
 
+#zoo_tabs {
+    float: left;
+    margin-bottom: 10px;
+}
+
+#weight_tabs {
+    float: right;
+    margin-bottom: 10px;
+}
