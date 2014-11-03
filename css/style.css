@@ -35,7 +35,7 @@ h2 a {
 
 footer {
   font-size: small;
-  margin-top: 20px;
+  margin-top: 2px;
 }
 
 header aside {
@@ -52,7 +52,7 @@ aside, #galaxies {
   font-size: small;
   right: 0;
   position: absolute;
-  width: 180px;
+  width: 13em;
 }
 
 #galaxies {
@@ -179,6 +179,8 @@ blockquote:after {
 
 div label, div input {
     display: block;
+    margin-bottom: 5px;
+    text-align: center;
 }
 
 input[type='range']::-moz-range-track {
@@ -217,10 +219,6 @@ input[type='range']::-moz-range-thumb {
     width: 20px;
 }
 
-div label {
-    text-align: center;
-}
-
 #sliders {
     display: table;
     margin: 0 auto;
@@ -228,9 +226,19 @@ div label {
 
 button {
     width: 120px;
-    height: 25px;
+    background-color: #555;
+    height: 1.5em;
     margin-top: 5px;
-    font-size: 13pt;
+    font-size: 1em;
+    border-radius: 20px;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+.plot_controls {
+    float: left;
+    margin-right: 50px;
 }
 
 .radio-tabs .tab_old {
@@ -255,9 +263,12 @@ button {
     background-color: #555;
     cursor: hand;
     cursor: pointer;
+    border-radius: 20px;
+    height: .5em;
+    line-height: .5em;
 }
 
-.radio-tabs .tab:hover {
+.radio-tabs .tab:hover, button:hover, button:active {
     background-color: #666;
 }
 

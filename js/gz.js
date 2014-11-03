@@ -44,7 +44,8 @@ d3.select("#zoo_4").on("change", function() {
 
 function set_zoo() {
     if (zoo == 1) {
-	json_list = []
+	json_list = [];
+	d3.select("#zoo_1").property("checked",1);
     } else if (zoo == 3) {
     // make the dropdown list
 	json_list = ['14846', '15335', '15517', '15584', '15588', '16987', '19537',
@@ -60,12 +61,13 @@ function set_zoo() {
 		     '21584', '21592', '21597', '21600', '21606', '21612', '21618',
 		     '21620', '21627', '21628', '21634', '21640', '21642', '21645',
 		     '21648', '21654', '21656', '21657', '21658', '21659', '21661',
-		     '21670', '21673', '21804', '21809']
+		     '21670', '21673', '21804', '21809'];
     
 	//9614 removed from the list since it does not have an image url
-	d3.select("#weight_raw").property("checked",1)
-	d3.select("#weight_weighted").property("disabled",1)
-	d3.select("#weight_bias").property("disabled",1)
+	d3.select("#zoo_3").property("checked",1);
+	d3.select("#weight_raw").property("checked",1);
+	d3.select("#weight_weighted").property("disabled",1);
+	d3.select("#weight_bias").property("disabled",1);
     } else if (zoo == 2) {
 	json_list = ['588017703996096547', '587738569780428805', '587735695913320507', '587742775634624545', 
 		     '587732769983889439', '588017725475782665', '588017702391578633', '588297864730181658', 
@@ -90,12 +92,14 @@ function set_zoo() {
 		     '587739099129380912', '587736941444530242', '587732582056525908', '588017605758550042', 
 		     '588017978901528612', '587725474420097049', '587726014532550731', '588017565483859979', 
 		     '588017703482032232', '587735344799350868', '587741722823819271', '588017569236910085', 
-		     '587731870707089488', '588848899380084803', '587735696440623158']
-	d3.select("#weight_raw").property("checked",1)
-	d3.select("#weight_weighted").property("disabled",0)
-	d3.select("#weight_bias").property("disabled",1)
+		     '587731870707089488', '588848899380084803', '587735696440623158'];
+	d3.select("#zoo_2").property("checked",1);
+	d3.select("#weight_raw").property("checked",1);
+	d3.select("#weight_weighted").property("disabled",0);
+	d3.select("#weight_bias").property("disabled",1);
     } else if (zoo == 4) {
-	json_list = []
+	json_list = [];
+	d3.select("#zoo_4").property("checked",1);
     }
     
     header = header.data(json_list, function(d) { return d; })
