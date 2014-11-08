@@ -9,12 +9,12 @@ To run locally just open index.html in a browser.
 
 The nodes can be moved by dragging them around and be collapsed by
 clicking on them. Clicking a second time will re-expand the nodes.
-The nodes will try to arrane themselves so the ones with the most voes
+The nodes will try to arrange themselves so the ones with the most votes
 are on top.
 
 There are 3 sliders at the top that can be used to adjust the tree:
 + `Charge`: How much the nodes repel each other
-+ `Link Strength`: How streachy the links are
++ `Link Strength`: How stretchy the links are
 + `Friction`: How damped the motion is
 
 The `Reset` button will set all the sliders back to their default position.
