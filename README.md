@@ -5,7 +5,7 @@ Galaxy Zoo visualization using a node tree
 
 The node tree is made using d3 and js.
 
-To run locally open index.html in a browser.
+To run locally just open index.html in a browser.
 
 The nodes can be moved by dragging them around and be collapsed by
 clicking on them. Clicking a second time will re-expand the nodes.

@@ -17,7 +17,10 @@ var margin = {top: 1, right: 1, bottom: 1, left: 1},
 var header = d3.select("#header")
     .append("select")
     .attr("id","galaxies")
-    .selectAll("option")
+    .selectAll("option");
+
+// load up my python package using pico
+//pico.load("sql_get_vote_path");
 
 // what version of galaxy zoo are we working with
 // set to 2 by default
@@ -42,13 +45,21 @@ d3.select("#zoo_4").on("change", function() {
     set_zoo();
 })
 
+d3.select("#light").on("change", function() {
+    d3.select("#css").attr("href","css/style.css");
+})
+d3.select("#dark").on("change", function() {
+    d3.select("#css").attr("href","css/style_dark.css");
+})
+
+
 function set_zoo() {
     if (zoo == 1) {
 	json_list = [];
 	d3.select("#zoo_1").property("checked",1);
     } else if (zoo == 3) {
     // make the dropdown list
-	json_list = ['14846', '15335', '15517', '15584', '15588', '16987', '19537',
+	/*json_list = ['14846', '15335', '15517', '15584', '15588', '16987', '19537',
 		     '19696', '19714', '19989', '20054', '20108', '20190', '20247',
 		     '20257', '20266', '20289', '20327', '20334', '20357', '20411',
 		     '20436', '20460', '20475', '20534', '20589', '20619', '20704',
@@ -61,7 +72,31 @@ function set_zoo() {
 		     '21584', '21592', '21597', '21600', '21606', '21612', '21618',
 		     '21620', '21627', '21628', '21634', '21640', '21642', '21645',
 		     '21648', '21654', '21656', '21657', '21658', '21659', '21661',
-		     '21670', '21673', '21804', '21809'];
+		     '21670', '21673', '21804', '21809'];*/
+
+	json_list = ['10000189', '10000215', '10000235', '10000249', '10000278',
+		     '10000325', '10000327', '10000331', '10000395', '10000416',
+		     '10000449', '10000457', '10000493', '10000504', '10000514',
+		     '10000519', '10002860', '10002902', '10002932', '10002937',
+		     '10003019', '10003051', '10003061', '10003080', '10003149',
+		     '10003153', '10003216', '10003361', '10003374', '10003386',
+		     '10003398', '10003402', '10003408', '10003442', '10003476',
+		     '10003488', '10003513', '10003528', '10003533', '10003534',
+		     '10003544', '10003559', '10003585', '10003685', '10003695',
+		     '10003703', '10003711', '10003719', '10003722', '10003727',
+		     '10003733', '10003750', '10003751', '10003782', '10003785',
+		     '10003801', '10003811', '10003846', '10003850', '10003853',
+		     '10003879', '10003909', '10003975', '10003977', '10004038',
+		     '10004047', '10004054', '10004065', '10004083', '10004086',
+		     '10004092', '10004094', '10004097', '10004100', '10004109',
+		     '10004113', '10004118', '10004144', '10004146', '10004153',
+		     '10004160', '10004163', '10004168', '10010723', '10010732',
+		     '10010804', '10010828', '10010842', '10010870', '10010872',
+		     '10010879', '10010933', '10010938', '10010981', '10010992',
+		     '10011013', '10011019', '10011026', '10011028', '10011054',
+		     '10011090', '10011094', '10011123', '10011132', '10011144',
+		     '10011152', '10011164', '10011183', '10011220', '10011247',
+		     '10011295', '10011298', '10011325']
     
 	//9614 removed from the list since it does not have an image url
 	d3.select("#zoo_3").property("checked",1);
@@ -95,7 +130,7 @@ function set_zoo() {
 		     '587731870707089488', '588848899380084803', '587735696440623158'];
 	d3.select("#zoo_2").property("checked",1);
 	d3.select("#weight_raw").property("checked",1);
-	d3.select("#weight_weighted").property("disabled",0);
+	d3.select("#weight_weighted").property("disabled",1);
 	d3.select("#weight_bias").property("disabled",1);
     } else if (zoo == 4) {
 	json_list = [];
@@ -116,7 +151,7 @@ function set_zoo() {
     // mouse over message
     d3.json("config/zoo"+zoo+"_offset.json", function(d){ 
 	image_offset = d; 
-	run_default()
+	run_default();
     });
 };
 
@@ -187,14 +222,13 @@ function updateData(gal_id){
     update_strength(1);
     update_friction(0.35);
 
-    if (zoo==3) {
-	file_name="data/"+gal_id+".json";
-    } else if (zoo==2){
-	file_name="raw_data/json/"+gal_id+".json"
-    }
+    file_name="data/"+gal_id+".json";
+    d3.json(file_name, json_callback);
+    //sql_get_vote_path.get_path("gz"+zoo,[gal_id], json_callback);
 
     // now that the basics are set up read in the json file
-    d3.json(file_name, function(answers) { 
+    var Total_value
+    function json_callback(answers) { 
 	// draw the galaxy image
 	$(".galaxy-image").attr("src", answers.image_url);
 	root = answers;
@@ -209,6 +243,7 @@ function updateData(gal_id){
 	root.links.forEach(function(link, i) {
 	    // give each link a unique id
 	    link.link_id = i;
+	    link.is_max = false;
 	    var source = link.source,
 		target = link.target;
 	    if (typeof source === "number") source = link.source = root.nodes[link.source];
@@ -218,22 +253,22 @@ function updateData(gal_id){
 	});
 	// Get the number of votes for each node
 	root.nodes.forEach(function(node) {
-	    if (zoo==3) {
-		node.value = Math.max(
-		    d3.sum(node.sourceLinks, function(L) {return L.value}),
-		    d3.sum(node.targetLinks, function(L) {return L.value})
-		);
-	    } else if (zoo==2) {
-		// Pick the vote weighting
-		if (d3.select("#weight_raw").property("checked")) {
-		    node.value = node.votes[0];
-		} else if (d3.select("#weight_weighted").property("checked")) {
-		    node.value = node.votes[1];
-		} else {
-		    node.value = node.votes[2];
-		}
-	    }
+	    node.value = Math.max(
+		d3.sum(node.sourceLinks, function(L) {return L.value}),
+		d3.sum(node.targetLinks, function(L) {return L.value})
+	    );
 	});
+	function max_path(node) {
+	    if (node.sourceLinks.length>0) {
+		link_values=[]
+		node.sourceLinks.forEach(function(d) { link_values.push(d.value); });
+		idx_max = link_values.indexOf(Math.max.apply(Math, link_values));
+		node.sourceLinks[idx_max].is_max = true;
+		max_path(node.sourceLinks[idx_max].target);
+	    }
+	};
+	// Find the links along the max vote path
+	max_path(root.nodes[0]);
 	// Normalize votes by total number
 	Total_value=root.nodes[0].value
 	root.nodes.forEach(function(node, i) {
@@ -241,20 +276,6 @@ function updateData(gal_id){
 	    // set the radius such that 18 full sized nodes could fit
 	    node.radius = width * Math.sqrt(node.value) / 18;
 	    node.node_id = i;
-	    if (zoo==2) {
-		node._radius = []
-		node._values = []
-		total_votes = root.nodes[0].votes
-		node.votes.forEach(function(v,idx) {
-		    if (i==0) {
-			node._radius.push(100); // first node always 100
-			node._values.push(1); //
-		    } else {
-			node._values.push(v/total_votes[idx]);
-			node._radius.push(width * Math.sqrt(v/total_votes[idx]) /18);
-		    }
-		})
-	    }
 	});     
 	// get the x position for each node
 	computeNodeBreadths(root);
@@ -284,7 +305,7 @@ function updateData(gal_id){
 	root.nodes[0].fixed = true;
 	// run the call-back function to update positions
 	update(root.nodes, root.links);
-    });
+    };
     
     // make the links long nice by using diagonal
     // swap x and y so the curve goes the propper way
@@ -310,10 +331,13 @@ function updateData(gal_id){
 	
 	// add a path object to each link
 	link.enter().insert("path", ".gnode")
-            .attr("class", "link")
+            .attr("class", function(d) { return d.is_max ? "link_max" : "link"; })
 	    .attr("d", diagonal)
-            .style("stroke-width", function(d) { return .5 * Math.min(d.target.radius, d.source.radius); });
+            .style("stroke-width", function(d) { return .5 * width * Math.sqrt(d.value/Total_value) / 18; });
 
+	link.append("title")
+	    .text(function(d) { return d.value; })
+    
 	// Exit any old links
 	link.exit().remove();
 
