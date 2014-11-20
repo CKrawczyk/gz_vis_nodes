@@ -176,7 +176,21 @@ blockquote:after {
 .link_max {
     fill: none;
     stroke: #007fff;
-    stroke-opacity: .5;
+    stroke-opacity: .4;
+}
+
+.breadcrumb {
+    fill: #007fff;
+    opacity: .4;
+}
+
+.breadcrumb:hover {
+    opacity: .6;
+}
+
+.breadcrumb_text {
+    fill: #fff;
+    font-size: 1.6em;
 }
 
 .link:hover {

@@ -28,7 +28,13 @@ def get_path(table='gz2',argv=[180,0]):
 
     path_dict={}
     for p in path:
-        i=[0]+map(int,p[0].split(','))
+        i=map(int,p[0].split(','))
+        # detect index answering the frist question in a classification
+        # this will avoid the issue when people hit the reset button
+        idx_first=[x for x,y in enumerate(i) if (y==1 or y==2 or y==3)]
+        # only take the final time through the tree
+        i=i[idx_first[-1]:]
+        i=[0]+i
         # check to make srue all votes are unique (avoids crashes in the js)
         if len(i)==len(set(i)):
             if 14 in i:

@@ -179,6 +179,20 @@ blockquote:after {
     stroke-opacity: .4;
 }
 
+.breadcrumb {
+    fill: #ff8000;
+    opacity: .4;
+}
+
+.breadcrumb:hover {
+    opacity: .6;
+}
+
+.breadcrumb_text {
+    fill: #000;
+    font-size: 1.6em;
+}
+
 .link:hover {
     stroke-opacity: .3;
 }

@@ -12,7 +12,7 @@ Array.prototype.contains = function(obj) {
 // set up the margins and such
 var margin = {top: 1, right: 1, bottom: 1, left: 1},
 	width = 1280 - margin.left - margin.right,
-	height = 720 - margin.top - margin.bottom;
+	height = 680 - margin.top - margin.bottom;
 
 var header = d3.select("#header")
     .append("select")
@@ -167,7 +167,7 @@ function run_default() {
 // function that takes in a galaxy id and makes the node tree
 function updateData(gal_id){
     // clear the page
-    d3.select("svg").remove();
+    d3.selectAll("svg").remove();
     // make sure dropdown list matches this id (useful for refresh)
     d3.select("#galaxies").property("value",gal_id)
 
@@ -258,17 +258,20 @@ function updateData(gal_id){
 		d3.sum(node.targetLinks, function(L) {return L.value})
 	    );
 	});
+	var max_nodes=[root.nodes[0]]
 	function max_path(node) {
 	    if (node.sourceLinks.length>0) {
 		link_values=[]
 		node.sourceLinks.forEach(function(d) { link_values.push(d.value); });
 		idx_max = link_values.indexOf(Math.max.apply(Math, link_values));
 		node.sourceLinks[idx_max].is_max = true;
+		max_nodes.push(node.sourceLinks[idx_max].target)
 		max_path(node.sourceLinks[idx_max].target);
 	    }
 	};
 	// Find the links along the max vote path
 	max_path(root.nodes[0]);
+	
 	// Normalize votes by total number
 	Total_value=root.nodes[0].value
 	root.nodes.forEach(function(node, i) {
@@ -303,6 +306,77 @@ function updateData(gal_id){
 	root.nodes[0].x = root.nodes[0].radius;
 	root.nodes[0].y = height/2;
 	root.nodes[0].fixed = true;
+	// Add breadcrumb trail for max_path
+	// Breadcrumb dimensions: width, height, spacing, width of tip/tail.
+	var b = { h: 20, s: 3, t: 15 };
+	b['w'] = (width-b.t-3*(max_nodes.length-1))/max_nodes.length;
+	// Generate a string that describes the points of a breadcrumb polygon.
+	var max_height = 1;
+	function wrap(text, width) {
+	    text.each(function() {
+		var text = d3.select(this),
+		    words = text.text().split(/\s+/).reverse(),
+		    word,
+		    line = [],
+		    lineNumber = 0,
+		    lineHeight = 1.1, // ems
+		    y = text.attr("y"),
+		    x = text.attr("x"),
+		    dy = parseFloat(text.attr("dy")),
+		    tspan = text.text(null).append("tspan").attr("x", x).attr("y", y).attr("dy", dy + "em");
+		while (word = words.pop()) {
+		    line.push(word);
+		    tspan.text(line.join(" "));
+		    if (tspan.node().getComputedTextLength() > width) {
+			line.pop();
+			tspan.text(line.join(" "));
+			line = [word];
+			tspan = text.append("tspan").attr("x", x).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+			if (lineNumber+1 > max_height) {
+			    max_height = lineNumber+1;
+			}
+		    }
+		}
+	    });
+	}
+	function breadcrumbPoints(d, i) {
+	    var points = [];
+	    points.push("0,0");
+	    points.push(b.w + ",0");
+	    points.push(b.w + b.t + "," + (b.h / 2));
+	    points.push(b.w + "," + b.h);
+	    points.push("0," + b.h);
+	    if (i > 0) { // Leftmost breadcrumb; don't include 6th vertex.
+		points.push(b.t + "," + (b.h / 2));
+	    }
+	    return points.join(" ");
+	}
+	var trail = d3.select("#sequence").append("svg:svg")
+	    .attr("width", width)
+	    .attr("height", b.h)
+	    .attr("id", "trail");
+	var g_bc = d3.select("#trail")
+	    .selectAll("g")
+	    .data(max_nodes, function(d) { return d.node_id; });
+	var g_bc_entering = g_bc.enter().append("svg:g");	
+	g_bc_entering.append("svg:text")
+	    .attr("class", "breadcrumb_text")
+	    .attr("x", (b.w + b.t) / 2)
+	    .attr("y", 0 )
+	    .attr("dy", "1em")
+	    .attr("text-anchor", "middle")
+	    .text(function(d) { return image_offset[d.answer_id][0] + ": " + Math.round(d.value*Total_value); });
+	g_bc.selectAll("text")
+	    .call(wrap, b.w-2*b.t);
+	b['h'] = 20 * max_height;
+	g_bc_entering.insert("svg:polygon","text")
+	    .attr("class", "breadcrumb")
+	    .attr("points", breadcrumbPoints);
+	trail.attr("height",b.h);
+	g_bc.attr("transform", function(d, i) {
+	    return "translate(" + i * (b.w + b.s) + ", 0)";
+	});
+	g_bc.exit().remove();
 	// run the call-back function to update positions
 	update(root.nodes, root.links);
     };
@@ -401,7 +475,7 @@ function updateData(gal_id){
 
 	// add the mouse over text
 	var mouse_over = genter.append("title")
-	    .text(function(d) { return d.answer_id ? image_offset[d.answer_id][0] + ": " + d.value*Total_value : image_offset[0][0] + ": " + d.value*Total_value; })
+	    .text(function(d) { return image_offset[d.answer_id][0] + ": " + Math.round(d.value*Total_value); })
     
 	// start the nodes moving
 	force.start();
@@ -419,7 +493,7 @@ function updateData(gal_id){
 		n.value = n._values[idx];
 		gimage.attr("transform", function(d) { return d.answer_id ? "scale(" + d.radius/50 + ")" : "scale(" + d.radius/100 + ")"; });
 		link.style("stroke-width", function(d) { return .5 * Math.min(d.target.radius, d.source.radius); });
-		mouse_over.text(function(d) { return d.answer_id ? image_offset[d.answer_id][0] + ": " + d.votes[idx] : image_offset[0][0] + ": " + d.votes[idx]; })
+		mouse_over.text(function(d) { return image_offset[d.answer_id][0] + ": " + d.votes[idx]; })
 	    });
 	    update_charge(d3.select("#slider_charge").property("value"));
 	}
