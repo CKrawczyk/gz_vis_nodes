@@ -7,6 +7,116 @@ import mysql.connector
 #cgitb.enable()
 #data=cgi.FieldStorage()
 
+gz2_valid_path={0:[1,2,3],
+                1:[16,17,18],
+                2:[4,5],
+                3:[14,15],
+                4:[25,26,27],
+                5:[6,7],
+                6:[8,9],
+                7:[8,9],
+                8:[28,29,30],
+                9:[10,11,12,13],
+                10:[14,15],
+                11:[14,15],
+                12:[14,15],
+                13:[14,15],
+                14:[19,20,21,22,23,24,38],
+                15:[-1],
+                16:[14,15],
+                17:[14,15],
+                18:[14,15],
+                19:[-1],
+                20:[-1],
+                21:[-1],
+                22:[-1],
+                23:[-1],
+                24:[-1],
+                25:[14,15],
+                26:[14,15],
+                27:[14,15],
+                28:[31,32,33,34,36,37],
+                29:[31,32,33,34,36,37],
+                30:[31,32,33,34,36,37],
+                31:[10,11,12,13],
+                32:[10,11,12,13],
+                33:[10,11,12,13],
+                34:[10,11,12,13],
+                36:[10,11,12,13],
+                37:[10,11,12,13],
+                38:[-1]}
+
+gz3_valid_path={0:[1,2,3],
+                1:[16,17,18],
+                2:[39,40],
+                3:[14,15],
+                4:[25,26,27],
+                5:[6,7],
+                6:[8,9,28,29,30],
+                7:[8,9,28,29,30],
+                8:[28,29,30],
+                9:[10,11,12,13],
+                10:[14,15],
+                11:[14,15],
+                12:[14,15],
+                13:[14,15],
+                14:[19,20,21,22,23,24,38],
+                15:[-1],
+                16:[14,15],
+                17:[14,15],
+                18:[14,15],
+                19:[-1],
+                20:[-1],
+                21:[-1],
+                22:[-1],
+                23:[-1],
+                24:[-1],
+                25:[14,15],
+                26:[14,15],
+                27:[14,15],
+                28:[31,32,33,34,36,37],
+                29:[31,32,33,34,36,37],
+                30:[31,32,33,34,36,37],
+                31:[10,11,12,13],
+                32:[10,11,12,13],
+                33:[10,11,12,13],
+                34:[10,11,12,13],
+                36:[10,11,12,13],
+                37:[10,11,12,13],
+                38:[-1],
+                39:[60,50,51,52,53,54],
+                40:[4,5],
+                41:[],
+                42:[],
+                43:[45,46],
+                44:[55,56],
+                45:[55,56],
+                46:[55,56],
+                47:[43,44],
+                48:[43,44],
+                49:[43,44],
+                50:[47,48,49,59],
+                51:[47,48,49,59],
+                52:[47,48,49,59],
+                53:[47,48,49,59],
+                54:[47,48,49,59],
+                55:[57,58],
+                56:[57,58],
+                57:[14,15],
+                58:[14,15],
+                59:[6,7],
+                60:[16,17,18,55,56]}
+    
+def valid_path(p,vp):
+    l=len(p)
+    p2=p+[-1]
+    valid=True
+    for i in range(l):
+        valid = (valid) and (p2[i+1] in vp[p2[i]])
+        if not valid:
+            return valid
+    return valid
+    
 def get_path(table='gz2',argv=[180,0]):
     #argv=data.getvalue('param').split()
     L=len(argv)
@@ -22,7 +132,12 @@ def get_path(table='gz2',argv=[180,0]):
         # look up by ra dec
         ra,dec=map(float,argv)
         ra,dec,gal_id,ra_gal,dec_gal,url=cursor.callproc('pGetNearestObj',args=(ra,dec,0,0,0,''))
-    
+
+    if table=='gz2':
+        vp=gz2_valid_path
+    elif table=='gz3':
+        vp=gz3_valid_path
+        
     cursor.callproc('pGetVotePath',args=(gal_id,))
     path=cursor.stored_results().next().fetchall()
 
@@ -33,16 +148,17 @@ def get_path(table='gz2',argv=[180,0]):
         # this will avoid the issue when people hit the reset button
         idx_first=[x for x,y in enumerate(i) if (y==1 or y==2 or y==3)]
         # only take the final time through the tree
-        i=i[idx_first[-1]:]
-        i=[0]+i
-        # check to make srue all votes are unique (avoids crashes in the js)
-        if len(i)==len(set(i)):
-            if 14 in i:
-                i=i[:-2]
-            elif 15 in i:
-                i=i[:-1]
-            for key in zip(i[:-1],i[1:]):
-                path_dict[key]=path_dict.get(key,0)+1
+        if len(idx_first)>0: # sometimes the first node is missing!
+            i=i[idx_first[-1]:]
+            i=[0]+i
+            # check that all votes makes a vlid path through the tree (no missing or repeated nodes!)
+            if valid_path(i,vp):
+                if 14 in i:
+                    i=i[:-2]
+                elif 15 in i:
+                    i=i[:-1]
+                for key in zip(i[:-1],i[1:]):
+                    path_dict[key]=path_dict.get(key,0)+1
     
     links=[{'source':k[0], 'target':k[1], 'value': v} for k,v in path_dict.iteritems()]
 

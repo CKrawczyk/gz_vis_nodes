@@ -9,6 +9,9 @@ Array.prototype.contains = function(obj) {
 	return false;
 }
 
+// set if the site should use the local json files of the full database
+var local_files = true;
+
 // set up the margins and such
 var margin = {top: 1, right: 1, bottom: 1, left: 1},
 	width = 1280 - margin.left - margin.right,
@@ -19,8 +22,10 @@ var header = d3.select("#header")
     .attr("id","galaxies")
     .selectAll("option");
 
-// load up my python package using pico
-//pico.load("sql_get_vote_path");
+// load up my python package using pico if using full datase
+if (!local_files) {
+    pico.load("sql_get_vote_path");
+}
 
 // what version of galaxy zoo are we working with
 // set to 2 by default
@@ -223,8 +228,11 @@ function updateData(gal_id){
     update_friction(0.35);
 
     file_name="data/"+gal_id+".json";
-    d3.json(file_name, json_callback);
-    //sql_get_vote_path.get_path("gz"+zoo,[gal_id], json_callback);
+    if (local_files) {
+	d3.json(file_name, json_callback);
+    } else {
+	sql_get_vote_path.get_path("gz"+zoo,[gal_id], json_callback);
+    }
 
     // now that the basics are set up read in the json file
     var Total_value
