@@ -48,15 +48,19 @@ footer aside {
   text-align: right;
 }
 
-aside, #galaxies {
+aside, #galaxies, #random_gal {
   font-size: small;
   right: 0;
   position: absolute;
   width: 13em;
 }
 
+#random_gal {
+  top: 25px;
+}
+
 #galaxies {
-  top: 40px;
+  top: 55px;
 }
 
 .attribution {

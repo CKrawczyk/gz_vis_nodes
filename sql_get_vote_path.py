@@ -1,16 +1,11 @@
 import pico
-#import json
+import re
 import mysql.connector
-#import sys
-#argv=sys.argv[1:]
-#import cgi, cgitb
-#cgitb.enable()
-#data=cgi.FieldStorage()
 
 gz2_valid_path={0:[1,2,3],
                 1:[16,17,18],
                 2:[4,5],
-                3:[14,15],
+                3:[-1],
                 4:[25,26,27],
                 5:[6,7],
                 6:[8,9],
@@ -49,7 +44,7 @@ gz2_valid_path={0:[1,2,3],
 gz3_valid_path={0:[1,2,3],
                 1:[16,17,18],
                 2:[39,40],
-                3:[14,15],
+                3:[-1],
                 4:[25,26,27],
                 5:[6,7],
                 6:[8,9,28,29,30],
@@ -95,7 +90,7 @@ gz3_valid_path={0:[1,2,3],
                 47:[43,44],
                 48:[43,44],
                 49:[43,44],
-                50:[47,48,49,59],
+                50:[43,44],
                 51:[47,48,49,59],
                 52:[47,48,49,59],
                 53:[47,48,49,59],
@@ -116,23 +111,30 @@ def valid_path(p,vp):
         if not valid:
             return valid
     return valid
-    
-def get_path(table='gz2',argv=[180,0]):
-    #argv=data.getvalue('param').split()
-    L=len(argv)
 
+def get_ramdom_name(table='gz2'):
+    cnx=mysql.connector.connect(user='root')
+    cnx.database=table
+    cursor=cnx.cursor()
+    gal_name,gal_id,ra_gal,dec_gal,url=cursor.callproc('pGetRandomObj',args=(0,0,0,0,''))
+    return {"gal_name":gal_name}
+
+def get_path(table='gz2',argv='180 0'):
     cnx=mysql.connector.connect(user='root')
     cnx.database=table
     cursor=cnx.cursor()
     
+    # split argv on "words"
+    argv=re.findall(r"[\w]+",argv)
+    L=len(argv)
     if L==1:
         # look up by sdssid
-        sdssid,gal_id,ra_gal,dec_gal,url=cursor.callproc('pGetNearestObjID',args=(argv[0],0,0,0,''))
+        sdssid,gal_name,gal_id,ra_gal,dec_gal,url=cursor.callproc('pGetNearestObjID',args=(argv[0],0,0,0,0,''))
     else:
         # look up by ra dec
         ra,dec=map(float,argv)
-        ra,dec,gal_id,ra_gal,dec_gal,url=cursor.callproc('pGetNearestObj',args=(ra,dec,0,0,0,''))
-
+        ra,dec,gal_name,gal_id,ra_gal,dec_gal,url=cursor.callproc('pGetNearestObj',args=(ra,dec,0,0,0,0,''))
+    
     if table=='gz2':
         vp=gz2_valid_path
     elif table=='gz3':
@@ -202,7 +204,7 @@ def get_path(table='gz2',argv=[180,0]):
             nodes.insert(idx,blank_node)
     
     # put it all together
-    out={'nodes':nodes,'links':links,'image_url':url,'ra':ra_gal,'dec':dec_gal}
+    out={'nodes':nodes,'links':links,'image_url':url,'ra':ra_gal,'dec':dec_gal,'gal_name':gal_name}
     #print json.dumps(out)
     cnx.close()
     return out
@@ -260,8 +262,8 @@ if __name__=="__main__":
 
     for id in json_list2:
         with open('data/'+id+'.json','w') as f:
-            out=json.dump(get_path('gz2',[id]),f)
+            out=json.dump(get_path('gz2',id),f)
 
     for id in json_list3:
         with open('data/'+id+'.json','w') as f:
-            out=json.dump(get_path('gz3',[id]),f)
+            out=json.dump(get_path('gz3',id),f)

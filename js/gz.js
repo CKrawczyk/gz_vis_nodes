@@ -17,10 +17,23 @@ var margin = {top: 1, right: 1, bottom: 1, left: 1},
 	width = 1280 - margin.left - margin.right,
 	height = 680 - margin.top - margin.bottom;
 
-var header = d3.select("#header")
-    .append("select")
-    .attr("id","galaxies")
-    .selectAll("option");
+if (local_files){
+    var header = d3.select("#header")
+	.append("select")
+	.attr("id","galaxies")
+	.selectAll("option");
+} else {
+    var header = d3.select("#header")
+	.append("input")
+	.attr("id","galaxies")
+	.attr("type","text");
+    var header_button = d3.select("#header")
+	.append("button")
+	.attr("type","button")
+	.text("Random")
+	.attr("id","random_gal")
+	.on("click", random_gal)
+}
 
 // load up my python package using pico if using full datase
 if (!local_files) {
@@ -63,22 +76,6 @@ function set_zoo() {
 	json_list = [];
 	d3.select("#zoo_1").property("checked",1);
     } else if (zoo == 3) {
-    // make the dropdown list
-	/*json_list = ['14846', '15335', '15517', '15584', '15588', '16987', '19537',
-		     '19696', '19714', '19989', '20054', '20108', '20190', '20247',
-		     '20257', '20266', '20289', '20327', '20334', '20357', '20411',
-		     '20436', '20460', '20475', '20534', '20589', '20619', '20704',
-		     '20753', '20754', '20772', '20774', '20871', '20918', '20927',
-		     '20986', '21078', '21086', '21165', '21245', '21261', '21291',
-		     '21339', '21364', '21383', '21422', '21430', '21442', '21465',
-		     '21471', '21478', '21482', '21486', '21493', '21504', '21513',
-		     '21515', '21518', '21525', '21528', '21531', '21544', '21550',
-		     '21556', '21559', '21573', '21574', '21575', '21576', '21582',
-		     '21584', '21592', '21597', '21600', '21606', '21612', '21618',
-		     '21620', '21627', '21628', '21634', '21640', '21642', '21645',
-		     '21648', '21654', '21656', '21657', '21658', '21659', '21661',
-		     '21670', '21673', '21804', '21809'];*/
-
 	json_list = ['10000189', '10000215', '10000235', '10000249', '10000278',
 		     '10000325', '10000327', '10000331', '10000395', '10000416',
 		     '10000449', '10000457', '10000493', '10000504', '10000514',
@@ -141,15 +138,17 @@ function set_zoo() {
 	json_list = [];
 	d3.select("#zoo_4").property("checked",1);
     }
-    
-    header = header.data(json_list, function(d) { return d; })
 
-    header.enter()
-	.append("option")
-	.attr("value", function(d) { return d; })
-	.text(function(d) { return d; });
+    if (local_files){
+	header = header.data(json_list, function(d) { return d; });
 
-    header.exit().remove()
+	header.enter()
+	    .append("option")
+	    .attr("value", function(d) { return d; })
+	    .text(function(d) { return d; });
+	
+	header.exit().remove();
+    }
 
     // read in file that maps the answer_id to the 
     // image offset in workflow.png and providing a useful
@@ -169,12 +168,17 @@ function run_default() {
     updateData(json_list[0]);
 };
 
+// random galaxy
+function random_gal() {
+    sql_get_vote_path.get_ramdom_name("gz"+zoo, function(d) {
+	updateData(d.gal_name);
+    });
+};
+
 // function that takes in a galaxy id and makes the node tree
 function updateData(gal_id){
     // clear the page
     d3.selectAll("svg").remove();
-    // make sure dropdown list matches this id (useful for refresh)
-    d3.select("#galaxies").property("value",gal_id)
 
     // hook up call-bakcs for the slider bars and reset button
     d3.select("#slider_charge").on("input", function() { update_charge(+this.value); })
@@ -231,7 +235,7 @@ function updateData(gal_id){
     if (local_files) {
 	d3.json(file_name, json_callback);
     } else {
-	sql_get_vote_path.get_path("gz"+zoo,[gal_id], json_callback);
+	sql_get_vote_path.get_path("gz"+zoo, gal_id, json_callback);
     }
 
     // now that the basics are set up read in the json file
@@ -239,6 +243,8 @@ function updateData(gal_id){
     function json_callback(answers) { 
 	// draw the galaxy image
 	$(".galaxy-image").attr("src", answers.image_url);
+	// make sure dropdown list matches this id (useful for refresh)
+	d3.select("#galaxies").property("value",answers.gal_name)
 	root = answers;
 	// make sure to minpulate data *before* the update loop
 	// add a list of source and target Links to each node
@@ -366,7 +372,7 @@ function updateData(gal_id){
 	var g_bc = d3.select("#trail")
 	    .selectAll("g")
 	    .data(max_nodes, function(d) { return d.node_id; });
-	var g_bc_entering = g_bc.enter().append("svg:g");	
+	var g_bc_entering = g_bc.enter().append("svg:g");
 	g_bc_entering.append("svg:text")
 	    .attr("class", "breadcrumb_text")
 	    .attr("x", (b.w + b.t) / 2)
