@@ -408,6 +408,57 @@ function updateData(gal_id){
 
     // create the update function to draw the tree
     function update(nodes_in, links_in) {
+	// Set data as node ids
+	var n_odd_nodes = Object.keys(root.odd_list).length
+	
+	if (n_odd_nodes > 0) {
+	    // place for the "odd" answers to go
+	    var odd_answers = d3.select("#odd").append("svg")
+		.attr("width",width + margin.left + margin.right)
+		.attr("height",width/12 + margin.top + margin.bottom)
+		.append("g")
+		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+	    var onode = odd_answers.selectAll(".onode");
+	
+	    onode = onode.data(Object.keys(root.odd_list), function(d) { return d });
+	    // Exit old nodes
+	    onode.exit().remove();
+	    
+	    var oenter = onode.enter().append("g")
+		.attr("class","onode")
+		.attr("transform", function(d,i) {
+		    return 'translate(' + [width*(i+.5)/n_odd_nodes, width/24] + ')'; 
+		});    
+	    var oimage = oenter.append("g")
+		.attr("transform", function(d) {
+		    value = root.odd_list[d] / Total_value;
+		    radius = width * Math.sqrt(value) / 18;
+		    return "scale(" + radius/50 + ")"
+		});
+	    oimage.append("defs")
+		.append("clipPath")
+		.attr("id", function(d) { return "myClip" + d; })
+		.append("circle")
+		.attr("cx", 0)
+		.attr("cy", 0)
+		.attr("r", 50);
+	    // add a black circle in the background
+	    oimage.append("circle")
+		.attr("color", "black")
+		.attr("cx", 0)
+		.attr("cy", 0)
+		.attr("r", 50);
+	    oimage.append("image")
+		.attr("xlink:href", "images/workflow.png")
+		.attr("x", -50)
+		.attr("y", function(d) { return -image_offset[d][1]*100-50; })
+		.attr("clip-path", function(d) { return "url(#myClip" + d + ")"; })
+		.attr("width", 100)
+		.attr("height", 4900);
+	    oenter.append("title")
+		.text(function(d) { return image_offset[d][0] + ": " + root.odd_list[d]; });
+	}
 	// add the nodes and links to the tree
 	force
 	    .nodes(nodes_in)

@@ -117,6 +117,7 @@ def get_ramdom_name(table='gz2'):
     cnx.database=table
     cursor=cnx.cursor()
     gal_name,gal_id,ra_gal,dec_gal,url=cursor.callproc('pGetRandomObj',args=(0,0,0,0,''))
+    cnx.close()
     return {"gal_name":gal_name}
 
 def get_path(table='gz2',argv='180 0'):
@@ -144,6 +145,7 @@ def get_path(table='gz2',argv='180 0'):
     path=cursor.stored_results().next().fetchall()
 
     path_dict={}
+    odd_dict={}
     for p in path:
         i=map(int,p[0].split(','))
         # detect index answering the frist question in a classification
@@ -156,6 +158,7 @@ def get_path(table='gz2',argv='180 0'):
             # check that all votes makes a vlid path through the tree (no missing or repeated nodes!)
             if valid_path(i,vp):
                 if 14 in i:
+                    odd_dict[i[-1]]=odd_dict.get(i[-1],0)+1
                     i=i[:-2]
                 elif 15 in i:
                     i=i[:-1]
@@ -204,7 +207,7 @@ def get_path(table='gz2',argv='180 0'):
             nodes.insert(idx,blank_node)
     
     # put it all together
-    out={'nodes':nodes,'links':links,'image_url':url,'ra':ra_gal,'dec':dec_gal,'gal_name':gal_name}
+    out={'nodes':nodes,'links':links,'image_url':url,'ra':ra_gal,'dec':dec_gal,'gal_name':gal_name,'odd_list':odd_dict}
     #print json.dumps(out)
     cnx.close()
     return out
