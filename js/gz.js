@@ -529,7 +529,7 @@ function updateData(gal_id){
 		    j = -1;
 		}
 		// the amount to move the node
-		delta_y = (5 * d.value - j * .3 * d.group + .5) * ky;
+		delta_y = (3 * d.value - j * .3 * d.group + .3) * ky;
 		// store the old position in case something goes wrong
 		// the collision detection can casue NaNs and I am not sure why
 		d.y_old = d.y;
