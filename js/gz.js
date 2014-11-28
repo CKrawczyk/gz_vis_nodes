@@ -247,6 +247,9 @@ function updateData(gal_id){
     function json_callback(answers) { 
 	// draw the galaxy image
 	$(".galaxy-image").attr("src", answers.image_url);
+	// Add text for RA and DEC
+	d3.select("#ra_dec")
+	    .text("RA: " + answers.ra.toFixed(3) + ", DEC:" + answers.dec.toFixed(3))
 	// make sure dropdown list matches this id (useful for refresh)
 	d3.select("#galaxies").property("value",answers.gal_name)
 	root = answers;
