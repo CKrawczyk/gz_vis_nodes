@@ -112,7 +112,7 @@ def valid_path(p,vp):
             return valid
     return valid
 
-def get_ramdom_name(table='gz2'):
+def get_random_name(table='gz2'):
     cnx=mysql.connector.connect(user='root')
     cnx.database=table
     cursor=cnx.cursor()
@@ -164,6 +164,14 @@ def get_path(table='gz2',argv='180 0'):
                     i=i[:-1]
                 for key in zip(i[:-1],i[1:]):
                     path_dict[key]=path_dict.get(key,0)+1
+
+    # convert odd_dict into json syntax and sorted by vote (max first)
+    odd_list=[]
+    for key,value in odd_dict.iteritems():
+        odd_list.append([key,value])
+    odd_list.sort(key=lambda x: x[1])
+    odd_list=odd_list[::-1]
+    odd_list=[{'name':k[0], 'value':k[1]} for k in odd_list]
     
     links=[{'source':k[0], 'target':k[1], 'value': v} for k,v in path_dict.iteritems()]
 
@@ -207,7 +215,7 @@ def get_path(table='gz2',argv='180 0'):
             nodes.insert(idx,blank_node)
     
     # put it all together
-    out={'nodes':nodes,'links':links,'image_url':url,'ra':ra_gal,'dec':dec_gal,'gal_name':gal_name,'odd_list':odd_dict}
+    out={'nodes':nodes,'links':links,'image_url':url,'ra':ra_gal,'dec':dec_gal,'gal_name':gal_name,'odd_list':odd_list}
     #print json.dumps(out)
     cnx.close()
     return out

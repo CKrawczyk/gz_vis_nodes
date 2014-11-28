@@ -14,8 +14,8 @@ var local_files = true;
 
 // set up the margins and such
 var margin = {top: 1, right: 1, bottom: 1, left: 1},
-	width = 1280 - margin.left - margin.right,
-	height = 680 - margin.top - margin.bottom;
+	width = 1080 - margin.left - margin.right,
+	height = 550 - margin.top - margin.bottom;
 
 if (local_files){
     var header = d3.select("#header")
@@ -165,12 +165,16 @@ d3.select("#galaxies")
 	});
 //load the first item of the list by default
 function run_default() {
-    updateData(json_list[0]);
+    if (local_files) {
+	updateData(json_list[0]);
+    } else {
+	random_gal();
+    }
 };
 
 // random galaxy
 function random_gal() {
-    sql_get_vote_path.get_ramdom_name("gz"+zoo, function(d) {
+    sql_get_vote_path.get_random_name("gz"+zoo, function(d) {
 	updateData(d.gal_name);
     });
 };
@@ -231,8 +235,8 @@ function updateData(gal_id){
     update_strength(1);
     update_friction(0.35);
 
-    file_name="data/"+gal_id+".json";
     if (local_files) {
+	file_name="data/"+gal_id+".json";
 	d3.json(file_name, json_callback);
     } else {
 	sql_get_vote_path.get_path("gz"+zoo, gal_id, json_callback);
@@ -290,8 +294,8 @@ function updateData(gal_id){
 	Total_value=root.nodes[0].value
 	root.nodes.forEach(function(node, i) {
 	    node.value /= Total_value;
-	    // set the radius such that 18 full sized nodes could fit
-	    node.radius = width * Math.sqrt(node.value) / 18;
+	    // set the radius such that 9 full sized nodes could fit
+	    node.radius = (1-2*.07) * width * Math.sqrt(node.value) / 18;
 	    node.node_id = i;
 	});     
 	// get the x position for each node
@@ -316,7 +320,7 @@ function updateData(gal_id){
 	    d.y = (1 - d.value + j * d.group/10) * height/2;
 	});
 	// fix the first node so it does not move
-	root.nodes[0].radius = 100
+	root.nodes[0].radius = .07 * width
 	root.nodes[0].x = root.nodes[0].radius;
 	root.nodes[0].y = height/2;
 	root.nodes[0].fixed = true;
@@ -409,36 +413,41 @@ function updateData(gal_id){
     // create the update function to draw the tree
     function update(nodes_in, links_in) {
 	// Set data as node ids
-	var n_odd_nodes = Object.keys(root.odd_list).length
+	var n_odd_nodes = root.odd_list.length
 	
 	if (n_odd_nodes > 0) {
 	    // place for the "odd" answers to go
-	    var odd_answers = d3.select("#odd").append("svg")
+	    var odd_answers1 = d3.select("#odd").append("svg")
 		.attr("width",width + margin.left + margin.right)
-		.attr("height",width/12 + margin.top + margin.bottom)
-		.append("g")
+		.attr("height",(width-2*.07)/9 + margin.top + margin.bottom)
+
+	    var odd_answers = odd_answers1.append("g")
 		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 	    var onode = odd_answers.selectAll(".onode");
-	
-	    onode = onode.data(Object.keys(root.odd_list), function(d) { return d });
+
+	    root.odd_list.forEach(function(d) {
+		value = d.value / Total_value;
+		d.radius = width * (1-2*.07) * Math.sqrt(value) / 18
+	    });
+	    
+	    onode = onode.data(root.odd_list, function(d) { return d.name });
 	    // Exit old nodes
 	    onode.exit().remove();
 	    
 	    var oenter = onode.enter().append("g")
 		.attr("class","onode")
-		.attr("transform", function(d,i) {
-		    return 'translate(' + [width*(i+.5)/n_odd_nodes, width/24] + ')'; 
-		});    
+		
 	    var oimage = oenter.append("g")
-		.attr("transform", function(d) {
-		    value = root.odd_list[d] / Total_value;
-		    radius = width * Math.sqrt(value) / 18;
-		    return "scale(" + radius/50 + ")"
+		.attr("transform", function(d) { return "scale(" + d.radius/50 + ")" });
+
+	    odd_answers1.attr("height",2*Math.ceil(root.odd_list[0].radius) + margin.top + margin.bottom);
+	    oenter.attr("transform", function(d,i) {
+		return 'translate(' + [width*(i+.5)/n_odd_nodes, Math.ceil(root.odd_list[0].radius)] + ')'; 
 		});
 	    oimage.append("defs")
 		.append("clipPath")
-		.attr("id", function(d) { return "myClip" + d; })
+		.attr("id", function(d) { return "myClip" + d.name; })
 		.append("circle")
 		.attr("cx", 0)
 		.attr("cy", 0)
@@ -452,12 +461,12 @@ function updateData(gal_id){
 	    oimage.append("image")
 		.attr("xlink:href", "images/workflow.png")
 		.attr("x", -50)
-		.attr("y", function(d) { return -image_offset[d][1]*100-50; })
-		.attr("clip-path", function(d) { return "url(#myClip" + d + ")"; })
+		.attr("y", function(d) { return -image_offset[d.name][1]*100-50; })
+		.attr("clip-path", function(d) { return "url(#myClip" + d.name + ")"; })
 		.attr("width", 100)
 		.attr("height", 4900);
 	    oenter.append("title")
-		.text(function(d) { return image_offset[d][0] + ": " + root.odd_list[d]; });
+		.text(function(d) { return image_offset[d.name][0] + ": " + d.value; });
 	}
 	// add the nodes and links to the tree
 	force
