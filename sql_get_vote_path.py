@@ -126,7 +126,7 @@ def get_path(table='gz2',argv='180 0'):
     cursor=cnx.cursor()
     
     # split argv on "words"
-    argv=re.findall(r"[\w.]+",argv)
+    argv=re.findall(r"[\w.-]+",argv)
     L=len(argv)
     if L==1:
         # look up by sdssid

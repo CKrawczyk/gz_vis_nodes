@@ -12,7 +12,7 @@ clicking on them. Clicking a second time will re-expand the nodes.
 The nodes will try to arrange themselves so the ones with the most votes
 are on top.
 
-There are 3 sliders at the top that can be used to adjust the tree:
+There are 3 sliders at the bottom that can be used to adjust the tree:
 + `Charge`: How much the nodes repel each other
 + `Link Strength`: How stretchy the links are
 + `Friction`: How damped the motion is

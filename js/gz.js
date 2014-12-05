@@ -413,13 +413,16 @@ function updateData(gal_id){
     var link = svg.selectAll(".link"),
 	gnode = svg.selectAll(".gnode");
 
+    var first_draw = true;
+
     // create the update function to draw the tree
     function update(nodes_in, links_in) {
 	// Set data as node ids
 	var n_odd_nodes = root.odd_list.length
 	
-	if (n_odd_nodes > 0) {
+	if (first_draw & n_odd_nodes > 0) {
 	    // place for the "odd" answers to go
+	    first_draw = false;
 	    var odd_answers1 = d3.select("#odd").append("svg")
 		.attr("width",width + margin.left + margin.right)
 		.attr("height",(width-2*.07)/9 + margin.top + margin.bottom)
